@@ -1,0 +1,13 @@
+ customshadervs vs3AxisSimp
+ customshaderfs fs_3axis2tex01
+ renderhint NormalAndSpecMapped
+ texture0 tat25_wall27
+ texture1 tat25_wall27n
+ texture6 tat25_wall27
+ texture7 tat25_wall27n
+ parameter float Specularity 0.1
+ parameter float Roughness 0.99
+ parameter float TopBias -0.00
+ parameter float TexWidth 4.0
+ parameter float TexHeight 4.0
+ parameter float TopTextureScale 1.0

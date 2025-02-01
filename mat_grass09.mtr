@@ -1,0 +1,16 @@
+twosided 1
+customshadervs vsFoliage
+customshaderfs fsFoliage
+renderhint NormalAndSpecMapped
+
+texture0 tat25_grass09
+
+parameter float Specularity 0.2
+parameter float Roughness 0.7
+
+parameter float FoliageWindAmplitudeMult 3.0
+parameter float FoliageWindWavelengthMult 3.0
+parameter float FoliageWindMax 1.5
+parameter int FoliageWindScaleByVCoord 1
+parameter float FoliageWindScaleVCoordPower 0.75
+parameter float FoliageWindNoiseScale 0.001

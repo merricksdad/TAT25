@@ -1,0 +1,2 @@
+parameter float WaterRim 1.0
+parameter float WaterRimDepth 3.0

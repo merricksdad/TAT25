@@ -1,0 +1,883 @@
+//=============================================================================
+//
+// inc_3axisSimp.shd 
+// 
+// uses one set of textures to paint on three axes in world space
+//
+//=============================================================================
+
+
+//==============================
+//			CUSTOM UTILS
+//==============================
+
+//disable to automatically calculate UV by world coordinates
+//int bUseOriginalUV = 0;
+
+//enable/disable RGB axial painting to debug orientation
+//0 == off
+//1 == material painting
+//2 == world direction painting
+//3 == vertex normal painting
+//4 == fragment normal painting
+int bUseTestingColors = 0;
+
+//use this to pinch out sun fogging on the landscape near the player
+float fFogPinchDist = 45.0;
+
+
+
+//==============================
+//			MATERIAL
+//==============================
+
+//get parameters
+uniform float TopBias;
+
+uniform float TexWidth;
+uniform float TexHeight; 
+uniform float TopTextureScale; 
+uniform float TexTopWidth;
+uniform float TexTopHeight;
+
+uniform int UseOriginalUV;
+
+
+//==============================
+//	    SETUP TEXTURES
+//==============================
+
+vec2 vTexCoordsTop;
+vec2 vTexCoordsBot;
+vec2 vTexCoordsFront;
+vec2 vTexCoordsBack;
+vec2 vTexCoordsRight;
+vec2 vTexCoordsLeft;
+
+varying vec3 vMixing;
+
+int nBotChannel = 1;
+
+
+#ifndef USE_LOCAL_NORMAL
+	#define USE_LOCAL_NORMAL 0
+#endif
+
+
+//prepares texture coordinates in world space for biplanar wrapping
+void SetupThreeAxisTextures()
+{
+	vec3 vCoordSys;
+	
+	//replace texture coordinate system if needed
+	#if USE_LOCAL_NORMAL == 1
+		vCoordSys = vLocalPos;
+	#else
+		vCoordSys = vPosWorldUV;
+	#endif
+
+	//Build a texture cube
+	if (UseOriginalUV == 0) {
+	
+		float fScaleTopX = TexWidth;
+		float fScaleTopY = TexHeight;
+		
+		//two options for top texture scale
+		if (TopTextureScale != 0) {
+			//ratio
+			fScaleTopX /= TopTextureScale;
+			fScaleTopY /= TopTextureScale;
+		} else {
+			//explicit
+			fScaleTopX = TexTopWidth;
+			fScaleTopY = TexTopHeight;
+		}
+
+		//calculate texture coordinates in worldspace, 
+		//on each axis, in each direction
+		vTexCoordsTop = vec2(vCoordSys.x/fScaleTopX, vCoordSys.y/fScaleTopY);	
+		vTexCoordsFront = vec2(vCoordSys.x/TexWidth, vCoordSys.z/TexHeight);
+		vTexCoordsRight = vec2(vCoordSys.y/TexWidth, vTexCoordsFront.y);		
+
+		#if UNDERSIDE_NOT_TOP == 1
+			//consider bottom like a side
+			vTexCoordsBot = -vec2(vCoordSys.x/TexWidth, vCoordSys.y/TexHeight);
+			nBotChannel = NUM_TEXTURES;
+		#else
+			//paint bottom with top texture
+			vTexCoordsBot = vTexCoordsTop;
+		#endif 
+
+	} else {
+		//just initialize the cube sides
+		vTexCoordsTop = vec2(vVertexTexCoords.xy);
+		vTexCoordsBot = vec2(vVertexTexCoords.xy);
+		vTexCoordsFront = vec2(vVertexTexCoords.xy);
+		vTexCoordsRight = vec2(vVertexTexCoords.xy);		
+	}
+}
+
+
+void SetupThreeAxisSpecularity(vec3 Albedo)
+{
+	#if ENVIRONMENT_MAP == 1 && (SPECULAR_MAP != 1 || ROUGHNESS_MAP != 1)
+	
+	float fLegacyEnvMapToPBRFactor = max(fEnvMapLevel-fLegacyEnvMapToPBRThreshold, 0.0) / (1.0 - fLegacyEnvMapToPBRThreshold);
+	
+	#endif
+
+	// Determine specularity.
+	#if MATERIAL_SPECULARITY_OVERRIDE == 0
+	if(Specularity>0.0)
+	{
+		fSpecularity = Specularity;
+		#if SPECULARITY_BY_BRIGHTNESS == 1
+		fSpecularity *= ColorToBrightness(FragmentColor);
+		#endif
+	}
+	else
+	{
+		//specularity calculation is about 10% of this shader time
+		#if SPECULAR_MAP == 1 			
+			
+			//grab the base specularity at each relative texture coordinate
+			//from the separate rgb channels					
+			//then perform mix only when needed
+			fSpecularity = 0.0;
+
+			if (vMixing.z > 0.0) {fSpecularity+= GetSpecularMapValue(vTexCoordsTop, 1) * vMixing.z;}
+			else {fSpecularity+= GetSpecularMapValue(vTexCoordsBot, nBotChannel) * abs(vMixing.z);}
+			
+			fSpecularity+= GetSpecularMapValue(vec2(sign(vMixing.y),1.0)*vTexCoordsFront, NUM_TEXTURES) * abs(vMixing.y);
+			
+			fSpecularity+= GetSpecularMapValue(vec2(-sign(vMixing.x),1.0)*vTexCoordsRight, NUM_TEXTURES) * abs(vMixing.x);
+										
+		#elif ENVIRONMENT_MAP == 1
+			// This is mainly for the sake of enabling specularity on legacy content.
+			fSpecularity = mix(fSpecularityMin, fLegacyEnvMapSpecularityMax, min(fLegacyEnvMapToPBRFactor*fLegacyEnvMapSpecularityModifier, 1.0));
+
+		#else
+			fSpecularity = fSpecularityMin;
+		#endif				
+		
+	}
+	#endif
+	
+	// Determine roughness.
+	#if MATERIAL_ROUGHNESS_OVERRIDE == 0
+	if(Roughness>0.0)
+	{
+		fRoughness = Roughness;
+	}
+	else
+	{
+		#if ROUGHNESS_MAP == 1
+
+			#if MATERIAL_READ_ROUGHNESS_FROM_SPECULAR_MAP == 1
+				fRoughness = texture2D(texUnit2, vTexCoords.xy).g;
+			#else
+				//grab the base specularity at each relative texture coordinate
+				//from the separate rgb channels
+				//perform mix 
+				fRoughness = 0.0;
+
+				if (vMixing.z>0.0) {fRoughness+= GetRoughnessMapValue(vTexCoordsTop, 1) * vMixing.z;} 
+				else {fRoughness+= GetRoughnessMapValue(vTexCoordsBot, nBotChannel) * abs(vMixing.z);}
+				
+				fRoughness+= GetRoughnessMapValue(vec2(sign(vMixing.y),1.0)*vTexCoordsFront, NUM_TEXTURES) * abs(vMixing.y);
+			
+				fRoughness+= GetRoughnessMapValue(vec2(-sign(vMixing.x),1.0)*vTexCoordsRight, NUM_TEXTURES) * abs(vMixing.x);
+			#endif
+
+		#elif SPECULAR_MAP == 1
+			
+			// If we have a specular map without a roughness map, we assume that our input isn't geared for our PBR lighting model. Therefore, we translate it PBR values.
+			fRoughness = mix(fGeneratedRoughnessMin, fGeneratedRoughnessMax, sqr(1.0-fSpecularity));
+
+			#if ENVIRONMENT_MAP == 1
+			
+				fRoughness = min(fRoughness, mix(fGeneratedRoughnessMax, fGeneratedRoughnessMin, min(fLegacyEnvMapToPBRFactor * fLegacyEnvMapRoughnessModifier, 1.0)));
+				
+			#endif 
+
+		#elif ENVIRONMENT_MAP == 1
+
+			fRoughness =  mix(fGeneratedRoughnessMax, fGeneratedRoughnessMin, min(fLegacyEnvMapToPBRFactor * fLegacyEnvMapRoughnessModifier, 1.0));
+						
+		#else
+		
+			fRoughness = fGeneratedRoughnessMax;
+
+		#endif
+
+	}
+	#endif
+	
+	#if MATERIAL_METALICNESS_OVERRIDE == 0
+		// Determine metallicness. This affects the color of specular light and diffuse light level.
+		if(Metallicness>0.0)
+		{
+			fMetallicness = Metallicness;
+		}
+		else
+		{
+			fMetallicness = clamp(fMetallicnessModifier * fSpecularity - fMetallicnessMod, 0.0, 1.0);
+
+		}
+	#endif
+	
+	
+	#if MATERIAL_SPECULAR_COLOR_OVERRIDE == 0
+	
+		#if GAMMA_CORRECTION == 1
+			#if HEIGHT_MAP != 1
+				
+				// In principle, non-metallic should be white, but since dark colours in diffuse textures are usually used to simulate crevices etc., we scale with max color channel value.
+
+				SpecularColor = mix(vec3(min(1.0, 2.0 * max(Albedo.r, max(Albedo.g, Albedo.b)))), Albedo.rgb, fMetallicness);
+				
+			#else
+			
+				SpecularColor = mix(COLOR_WHITE.rgb, Albedo.rgb, fMetallicness);
+			
+			#endif
+		#else
+			SpecularColor = Albedo.rgb;
+		#endif
+	#endif
+}
+
+
+
+#if HEIGHT_MAP == 1
+
+	 
+
+	#if SHADER_QUALITY_MODE > 1
+		const int nDisplacementMaximumIterations = 32;  
+	#else
+		const int nDisplacementMaximumIterations = 16;  
+	#endif
+
+
+
+
+	//This is a modification of the original DisplaceTextureCoords
+	//but means to work in world space texture coordinates.
+	//The changes are that it accepts a mixing factor based on the angle of the vertex normal,
+	//and a map channel index, where map channel 1 links to textures 0-5, and channel 2 links
+	//textures 6-11
+	vec2 GetDisplacement(vec2 vTexCoords, mat3 mTSB, int iMapChannel, float fMix)
+	{
+	
+		vec2 vShiftDiff = vec2(0.0);
+		float fragCameraDist = abs(vPosView.z);
+
+		if (fragCameraDist > fHeightMapMaxDistance) return vShiftDiff;
+		
+		if(texture4Bound != 0)
+		{	
+			#if FRAGMENT_LIGHTING == 1
+			//if(fDisplacementModifier!=0.0)
+			//{							
+				float fDisplacementMultiplier = DisplacementMultiplier != 0.0 ? DisplacementMultiplier : fDisplacementMultiplierDefault;
+				
+				//get the angle between the surface and view line to that surface?
+				//not an actual angle value?
+				float fDisplacementAngle = dot(vViewToSurface_n, vSurfaceNormal);
+								
+				//multiply by a predefined displacement per angle
+				float fDisplacementSurfaceModifier = 1.0 + fDisplacementAngleIterationsModifier * fDisplacementAngle;
+
+				//factor in distance to surface from view
+				fDisplacementSurfaceModifier *= fDisplacementSurfaceModifier  / (-vPosView.z * fDisplacementDistanceIterationsModifier);
+
+				//calculate how many iterations to displace from that point
+				float fIterations = fDisplacementMaximumIterations*fDisplacementMultiplier*clamp(fDisplacementSurfaceModifier*screenHeight/1080.0, 0.0, 1.0);
+
+				//copy the original texture coords to use again later
+				//vTexCoords is per shading orientation, not per the original UV map
+				vec2 vOrigTexCoords = vec2(vTexCoords.x, vTexCoords.y);
+
+				//round up so there is at least one iteration
+				int nIterations = int(fIterations+0.5);
+				if(nIterations>0)
+				{		
+					//calculate view displacement 
+					for (int n=0;n<=2;n++)
+					{
+						mTSB[n] = mat3(m_view)*mTSB[n];
+					}
+					
+					vec3 vViewDisplacement = vec3(transpose(mTSB) * -vViewToSurface_n);
+					
+																						
+
+
+					float fSegmentSize = 2.0 / float(nIterations+1);
+					
+					//-1 here will throw an error
+					if (vViewDisplacement.z == -1.0) return vec2(0,0);
+					
+					// Vector for maximum displacement
+					vec2 vTexDisplacement = -vViewDisplacement.xy * fDisplacementBase / (0.25 * sqr(vViewDisplacement.z + 1.0));
+					
+												
+					vec2 vTexCoordsDisplaced=vTexCoords.xy + DisplacementOffset * vTexDisplacement;
+					
+					vTexDisplacement*= fDisplacementMultiplier;
+					float fDisplacementThis;
+					
+					//decide which texture group to use
+					float fHeightMapBaseLevel = 1.0;
+					#if NUM_TEXTURES == 1
+						fDisplacementThis = fHeightMapBaseLevel-texture2D(texUnit4, vTexCoordsDisplaced.xy).r* fMix;
+					#else
+						if (iMapChannel == 1)
+						{
+							fDisplacementThis = fHeightMapBaseLevel-texture2D(texUnit4, vTexCoordsDisplaced.xy).r* fMix;
+						}
+						else
+						{
+							fDisplacementThis = fHeightMapBaseLevel-texture2D(texUnit10, vTexCoordsDisplaced.xy).r* fMix;
+						}
+					#endif
+					
+					float fDisplacementDelta = fDisplacementThis;
+
+					float fCurrentDistance = fSegmentSize * fDisplacementThis;
+					
+					for(int i = int(fIterations); i > 1; i--)
+					{
+						
+						if(i > nIterations) break;
+						
+						//decide which textures to use
+						#if NUM_TEXTURES == 1
+						if (iMapChannel == 1)
+						{
+							fDisplacementThis = 1.0-texture2D(texUnit4, vTexCoordsDisplaced.xy - vTexDisplacement * fCurrentDistance, fDisplacementTextureMipmapOffset).r* fMix; 
+
+						}
+						#else
+						if (iMapChannel == 1)
+						{
+							fDisplacementThis = 1.0-texture2D(texUnit4, vTexCoordsDisplaced.xy - vTexDisplacement * fCurrentDistance, fDisplacementTextureMipmapOffset).r* fMix; 
+						}
+						else 
+						{
+							fDisplacementThis = 1.0-texture2D(texUnit10, vTexCoordsDisplaced.xy - vTexDisplacement * fCurrentDistance, fDisplacementTextureMipmapOffset).r* fMix; 
+						}
+						#endif
+						
+						fDisplacementDelta = fDisplacementThis - fCurrentDistance;
+
+						if(fDisplacementDelta<0.0)
+						{
+						
+							fDisplacementDelta /= fCurrentDistance;
+							fSegmentSize*=0.5;
+						}
+						else 
+						{
+							fDisplacementDelta /= 1.0-fCurrentDistance;
+						}
+						
+						fCurrentDistance += fDisplacementDelta * fSegmentSize;
+					}
+					
+					vTexCoords=vTexCoordsDisplaced.xy - vTexDisplacement*fCurrentDistance;
+					
+					//do some stuff with the final values...
+					//identify total shift
+					vShiftDiff = vTexCoords - vOrigTexCoords;
+												
+					//multiply total shift by mixing factor
+					//which helps blend areas near 45 degrees from a cardinal direction
+					vShiftDiff *= fMix;
+				}
+				
+				
+				
+			//}
+			
+			#endif
+		}
+		
+		return vShiftDiff;
+	}
+
+
+	void SetupOcclusionFromTextureEx(vec2 vSampleTexCoords, sampler2D sHeightMap)
+	{
+		float fOcclusion = texture2D(sHeightMap, vSampleTexCoords.xy, max(0.0, OCCLUSION_VICINITT_RANGE - log2(-vPosView.z)) ).r - texture2D(sHeightMap, vSampleTexCoords.xy).r;
+		fOcclusion = clamp(fOcclusion * (1.0+OCCLUSION_MODIFIER) * OCCLUSION_MULTIPLIER, 0.0, 0.9);
+		fAmbientOcclusionModifier = sqr(1.0 - fOcclusion);
+		fSurfaceFadeModifier = 1.0 / mix(1.0, SURFACE_FADE_POINT_MIN, fAmbientOcclusionModifier*fAmbientOcclusionModifier);
+	}
+	
+	float GetOcclusionFromPointEx(vec2 vPointSample, int iMapChannel)
+	{
+		// Compare with difference to local average height.
+		float fOcclusion; 
+		if (iMapChannel == 1)
+		{
+			//fOcclusion = texture2D(texUnit4, vPointSample.xy, fOcclusionVicinityRange).r - texture2D(texUnit4, vPointSample.xy).r;
+			fOcclusion = texture2D(texUnit4, vPointSample.xy, max(0.0, OCCLUSION_VICINITT_RANGE - log2(-vPosView.z)) ).r - texture2D(texUnit4, vPointSample.xy).r;
+		}
+		#if NUM_TEXTURES == 2
+		else 
+		{
+			//fOcclusion = texture2D(texUnit10, vPointSample.xy, fOcclusionVicinityRange).r - texture2D(texUnit10, vPointSample.xy).r;				
+			fOcclusion = texture2D(texUnit10, vPointSample.xy, max(0.0, OCCLUSION_VICINITT_RANGE - log2(-vPosView.z)) ).r - texture2D(texUnit10, vPointSample.xy).r;
+		}
+		#endif
+		//fOcclusion = clamp(fOcclusion * (1.0+fOcclusionModifier) * fOcclusionBase, 0.0, 0.99);
+		fOcclusion = clamp(fOcclusion * (1.0+OCCLUSION_MODIFIER) * OCCLUSION_MULTIPLIER, 0.0, 0.9);
+		return fOcclusion;
+	}			
+
+	void SetupOcclusionEx()
+	{
+		//fSurfaceFadePoint = SURFACE_FADE_POINT_MIN;
+						
+
+		float fOcclusion = 0.0;
+		if (vMixing.z> 0.0) {fOcclusion += GetOcclusionFromPointEx(vTexCoordsTop, 1) * vMixing.z;}
+		else {fOcclusion += GetOcclusionFromPointEx(vTexCoordsBot, nBotChannel) * abs(vMixing.z);}
+		
+		fOcclusion += GetOcclusionFromPointEx(vec2(sign(vMixing.y),1.0)*vTexCoordsFront, NUM_TEXTURES)  * abs(vMixing.y);	
+		
+		fOcclusion += GetOcclusionFromPointEx(vec2(-sign(vMixing.x),1.0)*vTexCoordsRight, NUM_TEXTURES)  * abs(vMixing.x);
+		
+		//fAmbientOcclusionModifier = 1.0-fOcclusion;
+		//fSurfaceFadePoint = mix(1.0, fSurfaceFadePoint, sqr(fAmbientOcclusionModifier));
+		
+		fAmbientOcclusionModifier = sqr(1.0 - fOcclusion);
+		fSurfaceFadeModifier = 1.0 / mix(1.0, SURFACE_FADE_POINT_MIN, fAmbientOcclusionModifier*fAmbientOcclusionModifier);
+			
+
+	}
+#endif	
+
+
+			
+
+void SetupThreeAxisShaderInputs()
+{
+
+	#if LIGHTING == 1
+		FragmentColor.a *= materialFrontDiffuse.a;
+	#endif
+
+	#if POSITION_VIEW == 1
+		#if VERTEX_NORMAL == 1
+			// We need to normalize due to interpolation etc.
+			vSurfaceNormal = normalize(gl_FrontFacing ? vVertexNormal : -vVertexNormal);
+			vFragmentNormal = vSurfaceNormal;
+		#endif
+		
+		// Used for both specular light, height and environment map.
+		#if HEIGHT_MAP == 1 || (ENVIRONMENT_MAP == 1 && FRAGMENT_NORMAL == 1) || LIGHTING == 1 || SPECULAR_LIGHT == 1
+			SetupViewToSurfaceNormal();
+		#endif
+		
+	#endif
+	
+	#if NO_TEXTURE != 1
+						
+		SetupThreeAxisTextures();
+	
+		vec4 MainTextureColor;
+			
+		vTexCoords = vVertexTexCoords.xy;
+				
+		// Setup tangent space basis.
+		#if NORMAL_MAP == 1 || HEIGHT_MAP == 1
+
+			if(
+			#if HEIGHT_MAP == 1
+				//texture4Bound != 0 || 
+			#endif
+			#if NORMAL_MAP == 1
+				texture1Bound != 0 ||
+			#endif
+				false // allows adding the || operator in the above checks.
+				)
+			{
+				mat3 mTSB = SetupTSB_EX();
+			
+				#if HEIGHT_MAP == 1
+				/*
+					
+					vec3 vTotalDisplacement = vec3(0.0);
+										
+					//do per-axis height map from texture
+					if ( vMixing.z    >0.0) {								
+						
+						mTSB[0] = vec3(-1,0,0);
+						mTSB[1] =  vec3(0,-1,0);
+						mTSB[2] =  vec3(0,0,1);	
+						
+						mTSB[0] = vec3(-0.5*(1.0+vMixing.z),0,0);
+						mTSB[1] =  vec3(0,-0.5*(1.0+vMixing.z),0);
+						mTSB[2] =  vec3(0,0,abs(vFragmentNormal.z)*vMixing.z);	
+
+						
+						vTexCoordsTop.xy += GetDisplacement(vTexCoordsTop,   mTSB, 1, vMixing.z);
+					} else {		
+						
+						mTSB[0] =  vec3(1,0,0);
+						mTSB[1] =  vec3(0,1,0);
+						mTSB[2] =  vec3(0,0,-1);
+						
+						mTSB[0] =  vec3(0.5*(1.0+vMixing.z),0,0);
+						mTSB[1] =  vec3(0,0.5*(1.0+vMixing.z),0);
+						mTSB[2] =  vec3(0,0,-abs(vFragmentNormal.z)*-vMixing.z);
+						
+						vTexCoordsBot.xy *= -1;
+						vTexCoordsBot.xy += GetDisplacement(vTexCoordsBot,   mTSB, nBotChannel, abs(vMixing.z));
+					}
+					
+					if ( vMixing.y >0.0) {
+						
+						mTSB[0] =  vec3(-1,0,0);
+						mTSB[1] =  vec3(0,0,-1);
+						mTSB[2] =  vec3(0,-1,0);  
+
+						
+						mTSB[0] =  vec3(-abs(vFragmentNormal.y)*vMixing.y,0,0);
+						mTSB[1] =  vec3(0,0,-abs(vFragmentNormal.y)*vMixing.y);
+						mTSB[2] =  vec3(0,-abs(vFragmentNormal.z)*vMixing.z,0);  
+						
+						vTexCoordsFront.xy +=GetDisplacement(vTexCoordsFront, mTSB, NUM_TEXTURES, vMixing.y);
+					} else {
+						
+						mTSB[0] =  vec3(-1,0,0);
+						mTSB[1] =  vec3(0,0,-1);
+						mTSB[2] =  vec3(0,1,0);   
+												
+						mTSB[0] =  vec3(abs(vFragmentNormal.y)*-vMixing.y,0,0);
+						mTSB[1] =  vec3(0,0,-abs(vFragmentNormal.y)*-vMixing.y);
+						mTSB[2] =  vec3(0,abs(vFragmentNormal.z)*vMixing.z,0);   
+																		
+						vTexCoordsBack.xy +=GetDisplacement(vec2(sign(vMixing.y),1.0)*vTexCoordsFront,  mTSB, NUM_TEXTURES, -vMixing.y);
+					}
+					
+					if ( vMixing.x >0.0) {
+						//THIS
+						mTSB[0] = vec3(0,1,0);
+						mTSB[1] = vec3(0,0,-1);
+						mTSB[2] = vec3(-1,0,0);
+						
+						mTSB[0] = vec3(0,abs(vFragmentNormal.x)*vMixing.x,0);
+						mTSB[1] = vec3(0,0,-abs(vFragmentNormal.x)*vMixing.x);
+						mTSB[2] =  vec3(-abs(vFragmentNormal.z)*vMixing.z,0,0);   
+						
+						vTexCoordsLeft.xy += GetDisplacement(vec2(-sign(vMixing.x),1.0)*vTexCoordsRight,  mTSB, NUM_TEXTURES, vMixing.x);
+					} else {
+						
+						mTSB[0] = vec3(0,-1,0);
+						mTSB[1] = vec3(0,0,-1);
+						mTSB[2] = vec3(1,0,0);   
+						
+						mTSB[0] = vec3(0,-abs(vFragmentNormal.x)*-vMixing.x,0);
+						mTSB[1] = vec3(0,0,-abs(vFragmentNormal.x)*-vMixing.x);
+						mTSB[2] =  vec3(abs(vFragmentNormal.z)*vMixing.z,0,0);   
+
+						vTexCoordsRight.xy += GetDisplacement(vTexCoordsRight, mTSB, NUM_TEXTURES, -vMixing.x);
+					}	
+					*/
+					
+				#endif
+
+				#if NORMAL_MAP == 1 && LIGHTING == 1
+				if (texture1Bound == 1) {
+				
+					//get per-axis fragment normal from texture
+					//apply directional corrections to color values						
+					//convert to normals	
+												
+					vec2 vValueTopBot; 
+					vec2 vValueFrontBack;
+					vec2 vValueLeftRight;
+					
+					vec3 vFragUpDown;
+					vec3 vFragFrontBack;
+					vec3 vFragLeftRight;
+					
+					//clean current normal
+					vFragmentNormal.xyz = normalize(mat3(m_view_inv) * normalize(vVertexNormal));
+				
+				
+					if (vMixing.z > 0) 
+					{
+						vValueTopBot = GetNormalMapValue(vTexCoordsTop, 1);
+						vFragUpDown = NormalFromFragmentXY(vValueTopBot) * vMixing.z;
+					} else {
+						vValueTopBot = GetNormalMapValue(vTexCoordsBot, nBotChannel);	
+						vValueTopBot.r*=-1;
+						vValueTopBot.g*=-1;
+						vFragUpDown = NormalFromFragmentXY(vValueTopBot) * abs(vMixing.z);
+					}
+					
+
+					vValueFrontBack = GetNormalMapValue(vec2(sign(vMixing.y),1.0)*vTexCoordsFront, NUM_TEXTURES);
+					vValueFrontBack.r *= -1.0;							
+					vFragFrontBack = NormalFromFragmentXY(vValueFrontBack) * abs(vMixing.y);
+					
+					vValueLeftRight = GetNormalMapValue(vec2(-sign(vMixing.x),1.0)*vTexCoordsRight, NUM_TEXTURES);
+					vValueLeftRight.g *=-sign(vMixing.x);							
+					vValueLeftRight.r *=-sign(vMixing.x);
+					vValueLeftRight.rg = vValueLeftRight.gr;
+					vFragLeftRight = NormalFromFragmentXY(vValueLeftRight) * abs(vMixing.x);
+	
+												
+					//perform mixing
+					vFragmentNormal = (vFragmentNormal)  + (vFragLeftRight +vFragUpDown + vFragFrontBack); 
+					
+					//normalize
+					vFragmentNormal = normalize(vFragmentNormal);
+					
+					//re-transform
+					vFragmentNormal = mat3(m_view) * vFragmentNormal;
+																		
+				}	
+				#endif
+			}
+		#endif
+		
+		// Check for compatibility alone as texture0Bound is not set for certain elements.
+		if(texture0Bound == 0)
+		{ 
+			#if ENVIRONMENT_MAP == 1
+				MainTextureColor.rgb = vec3(0.666667, 0.666667, 0.666667);
+				fEnvMapLevel = 1.0;	
+			#else
+				MainTextureColor = COLOR_WHITE;
+			#endif
+		}
+		else
+		{
+			//perform mix 
+			MainTextureColor = vec4(0,0,0,1);
+
+			vec4 ColorMix;
+								
+			if (bUseTestingColors == 1)
+			{
+				//paint top, bottom, and sides
+				MainTextureColor.rgb = vec3(vMixing.z, -vMixing.z, vMixing.x + -vMixing.x + vMixing.y + -vMixing.y);
+				
+			} else if (bUseTestingColors == 2) {
+				//paint color cube RGB-CMY
+				MainTextureColor.rgb = vec3(vMixing.x+-vMixing.x+-vMixing.y, -vMixing.z+vMixing.x+-vMixing.y, -vMixing.z+-vMixing.x+vMixing.y);
+				
+			} else if (bUseTestingColors == 3) {
+				//paint vertex normal
+				MainTextureColor.rgb = normalize(mat3(m_view_inv) * vVertexNormal);
+					
+			} else if (bUseTestingColors == 4) {
+				//paint fragment normal
+				MainTextureColor.rgb = normalize(mat3(m_view_inv) * vFragmentNormal);
+				
+			} else {
+				//float fLum = 0.5;
+				//get per-axis diffuse color from texture
+				if ( vMixing.z    >=0.0) {
+					ColorMix = GetDiffuseMapValue(vTexCoordsTop, 1);
+					MainTextureColor += (ColorMix * vMixing.z);
+				} else {
+					ColorMix = GetDiffuseMapValue(vTexCoordsBot, nBotChannel);
+					MainTextureColor += (ColorMix * abs(vMixing.z));
+				}			
+				
+				ColorMix = GetDiffuseMapValue(vec2(sign(vMixing.y),1.0)*vTexCoordsFront, NUM_TEXTURES);
+				MainTextureColor += (ColorMix  * abs(vMixing.y));
+				
+				ColorMix = GetDiffuseMapValue(vec2(-sign(vMixing.x),1.0)*vTexCoordsRight, NUM_TEXTURES);
+				MainTextureColor += (ColorMix  * abs(vMixing.x));
+				
+
+			
+				#if ENVIRONMENT_MAP == 1
+
+					fEnvMapLevel = 1.0-MainTextureColor.a;
+
+					#if FRAGMENT_LIGHTING == 1 && LIGHTING == 1
+						MainTextureColor.rgb = mix(MainTextureColor.rgb, vec3(0.666667, 0.666667, 0.666667), fEnvMapLevel);									
+					#endif
+
+				#endif
+				
+				MainTextureColor = ApplyColorSpace(MainTextureColor);							
+			}
+		}
+
+				
+		// Only do this for vertex lighting - otherwise we apply environment maps as specular light instead.
+		#if ENVIRONMENT_MAP == 1
+
+				
+			#if SPECULAR_LIGHT != 1							
+			
+				vec3 vTexEnvironment;
+				// If not normal mapped, we can use the coordinates from the vertex shader instead.
+				#if FRAGMENT_NORMAL != 1
+					if(envMapCube == 1)
+					{
+						vTexEnvironment = SampleEnvironmentMapCube(vVertexTexCoordsEnvironmentCube, 0.0);
+					}
+					else
+					{
+						vTexEnvironment = SampleEnvironmentMap(vVertexTexCoordsEnvironment, 0.0);
+					}
+				#else
+					if(envMapCube == 1)
+					{
+						vTexEnvironment = SampleEnvironmentMapCube(CalculateEnvironmentTexCoordsCube(vFragmentNormal), 0.0);
+					}
+					else
+					{
+						vTexEnvironment = SampleEnvironmentMap(CalculateEnvironmentTexCoords(vFragmentNormal), 0.0);
+					}
+				#endif 
+			
+				MainTextureColor.rgb = mix(MainTextureColor.rgb, vTexEnvironment.rgb, fEnvMapLevel);
+
+			#endif
+
+			FragmentColor *= 1.0*MainTextureColor;
+		
+		#else
+
+			FragmentColor *= 1.0*MainTextureColor;
+
+		#endif
+
+	#endif
+
+	//so far, there has been no alpha discard in the
+	//3 axis shader
+
+	#if LIGHTING == 1
+
+		#if HEIGHT_MAP == 1
+			if(texture4Bound!=0)
+			{
+				SetupOcclusionEx();
+				//SetupOcclusionFromTexture(vTexCoords, texUnit4);
+			}
+			else
+			{
+				SetupOcclusionBase();
+			}					
+		#endif
+
+		#if FRAGMENT_LIGHTING == 1 || NORMAL_MAP == 1
+		
+			SetupThreeAxisSpecularity(FragmentColor.rgb * materialFrontDiffuse.rgb);
+				
+		#endif
+
+	#endif
+
+}
+
+void ApplyThreeAxisShader()
+{
+
+	SetupSunAndMoon();
+
+	#if LIGHTING == 1
+
+		#if FRAGMENT_LIGHTING == 1 || FRAGMENT_NORMAL == 1
+		
+			ComputeLightingEx(FragmentColor, vFragmentNormal);
+			
+			
+			#if SELF_ILLUMINATION_MAP == 1 
+
+				#if MATERIAL_READ_SELF_ILLUMINATION_FROM_SPECULAR_MAP == 1
+					if (texture2Bound == 1) {
+						//grab the base illumination at each relative texture coordinate
+						//from the blue channel of the specular map
+
+						float fIllum = 0.0;
+																					
+						if (vMixing.z>=0.0) {fIllum += GetIlluminationMapValueFromSpecularMap(vTexCoordsTop, 1) * vMixing.z;}
+						else {fIllum += GetIlluminationMapValueFromSpecularMap(vTexCoordsBot, nBotChannel) * abs(vMixing.z);}			
+						
+						fIllum += GetIlluminationMapValueFromSpecularMap(vec2(sign(vMixing.y),1.0)*vTexCoordsFront, NUM_TEXTURES) * abs(vMixing.y);
+						
+						fIllum += GetIlluminationMapValueFromSpecularMap(vec2(-sign(vmixing.x),1.0)*vTexCoordsRight, NUM_TEXTURES) * abs(vMixing.x);
+
+						FragmentColor.rgb *= FragmentColor.rgb * (VertexColor.rgb + fIllum);
+						FragmentColor.a *= VertexColor.a;
+					}
+				#else
+					#if GLOW_MAP == 1
+					if (texture5Bound == 1) {
+						//grab the base illumination at each relative texture coordinate
+						//from the separate illumination map texture
+
+						vec3 colorIllum = vec3(0);
+														
+						if (vMixing.z>=0.0) {colorIllum += GetIlluminationMapColor(vTexCoordsTop, 1) * vMixing.z;}
+						else {colorIllum += GetIlluminationMapColor(vTexCoordsBot, nBotChannel) * abs(vMixing.z);}			
+						
+						colorIllum += GetIlluminationMapColor(vec2(sign(vMixing.y),1.0)*vTexCoordsFront, NUM_TEXTURES) * abs(vMixing.y);
+					
+						colorIllum += GetIlluminationMapColor(vec2(-sign(vMixing.x),1.0)*vTexCoordsRight, NUM_TEXTURES) * abs(vMixing.x);
+
+						FragmentColor.rgb += ApplyColorSpace(colorIllum.rgb);
+					}
+					#else
+					if (texture5Bound == 1) {
+					
+						//grab the base illumination at each relative texture coordinate
+						//from the separate illumination map texture
+
+						float fIllum = 0.0;
+																					
+						if (vMixing.z>=0.0) {fIllum += GetIlluminationMapValue(vTexCoordsTop, 1) * vMixing.z;}
+						else {fIllum += GetIlluminationMapValue(vTexCoordsBot, nBotChannel) * abs(vMixing.z);}			
+						
+						fIllum += GetIlluminationMapValue(vec2(sign(vMixing.y),1.0)*vTexCoordsFront, NUM_TEXTURES) * abs(vMixing.y);
+						
+						fIllum += GetIlluminationMapValue(vec2(sign(vMixing.x),1.0)*vTexCoordsRight, NUM_TEXTURES) * abs(vMixing.x);
+
+						FragmentColor.rgb += fIllum;
+					}
+					#endif
+				#endif
+			#endif
+		#endif
+	#endif
+	
+	#if POSITION_WORLD == 1 || POSITION_VIEW == 1
+		ApplyTargetGroundHighlighting(FragmentColor);
+	#endif
+
+	#if KEYHOLING == 1
+		ApplyKeyhole(FragmentColor);
+	#endif
+	
+
+	FragmentColor.rgb = RevertColorSpace(FragmentColor.rgb);	
+
+
+	#if FOG == 1
+		//ApplyFog(FragmentColor);
+		ApplyBetterFog(FragmentColor);
+		//ApplySunFog(FragmentColor);
+	#endif
+	
+	#if GAMMA_CORRECTION == 1
+		ApplyColorTonemap(FragmentColor);
+	#endif    
+	
+	// DEBUG
+	//ApplyDebugModeOutput(FragmentColor);
+}
+

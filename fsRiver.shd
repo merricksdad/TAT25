@@ -1,0 +1,255 @@
+//=============================================================================
+//
+// fsRiver.shd
+// based on fslit_nm.shd
+//
+//=============================================================================
+#define SHADER_TYPE 2
+
+#define FOG 1
+#define KEYHOLING 1
+#define LIGHTING 1
+#define POSITION_WORLD 1
+
+//all values are set to 1 which will ALLOW them to be used
+//but internal checks will determine if they exist or not
+#define NORMAL_MAP 1
+#define SPECULAR_MAP 1
+#define ROUGHNESS_MAP 1
+#define HEIGHT_MAP 1
+#define SELF_ILLUMINATION_MAP 1
+#define ENVIRONMENT_MAP 0
+
+#define SLIDE_SHADER 2
+#define SLIDE_ALPHA 0
+#define PUNCHTHROUGH 0
+#define FORCE_ALLOW_DISCARD 1
+
+#include "inc_standard_md"
+	
+//What direction in UV coordinates will the texture slide
+//This value will be imported from the MTR file or modified by SetMaterialShaderUniformVec4
+uniform vec4 vSlide;
+uniform vec4 vSlide2;
+
+#include "inc_random"
+#include "inc_md_2024"
+
+vec2 vSlideNoise = vec2(0.0);
+vec2 vTexCoords2 = vec2(0.0);
+
+uniform int texture6Bound;
+uniform sampler2D texUnit6;	
+uniform int texture7Bound;
+uniform sampler2D texUnit7;
+uniform int texture8Bound;
+uniform sampler2D texUnit8;
+uniform int texture9Bound;
+uniform sampler2D texUnit9;
+uniform int texture10Bound;
+uniform sampler2D texUnit10;
+
+void SetupSlideShaderInputs()
+{
+	#if LIGHTING == 1
+		FragmentColor.a *= materialFrontDiffuse.a;
+	#endif
+
+	#if NO_TEXTURE == 1 || ENVIRONMENT_MAP == 1
+		AlphaDiscard(FragmentColor.a);
+	#endif
+
+	#if POSITION_VIEW == 1
+		#if VERTEX_NORMAL == 1
+			// We need to normalize due to interpolation etc.
+			vSurfaceNormal = normalize(gl_FrontFacing ? vVertexNormal : -vVertexNormal);
+			vFragmentNormal = vSurfaceNormal;
+		#endif
+		
+		// Used for both specular light, height and environment map.
+		#if HEIGHT_MAP == 1 || (ENVIRONMENT_MAP == 1 && FRAGMENT_NORMAL == 1) || LIGHTING == 1 || SPECULAR_LIGHT == 1
+			SetupViewToSurfaceNormal();
+		#endif
+		
+	#endif
+
+	#if NO_TEXTURE != 1
+
+		vec4 MainTextureColor;
+
+		//mod for slider
+		float fTick = worldtimerTimeOfDay/1000.0;
+		vTexCoords = vVertexTexCoords.xy - (fTick * vSlide.xy) + vSlideNoise;
+		vTexCoords2 = vVertexTexCoords.xy - (fTick * vSlide2.xy) - vSlideNoise;
+		//end mod for slider
+		
+		// Setup tangent space basis.
+		#if NORMAL_MAP == 1 || HEIGHT_MAP == 1
+
+			if(
+			#if HEIGHT_MAP == 1
+				texture4Bound != 0 || 
+			#endif
+			#if NORMAL_MAP == 1
+				texture1Bound != 0 ||
+			#endif
+				false // allows adding the || operator in the above checks.
+				)
+			{
+				mat3 mTSB = SetupTSB();
+				
+				#if HEIGHT_MAP == 1
+					if(texture4Bound != 0)
+					{
+						DisplaceTextureCoords(vTexCoords, texUnit4, mTSB);
+					}
+
+					if(texture10Bound != 0)
+					{
+						DisplaceTextureCoords(vTexCoords2, texUnit10, mTSB);
+					}
+				#endif
+
+				#if NORMAL_MAP == 1 && LIGHTING == 1
+					if(texture1Bound != 0)
+					{
+						vFragmentNormal.xy = texture2D(texUnit1, vTexCoords).rg * 2.0 - 1.0;
+						vFragmentNormal.z = sqrt(max(1.0 - dot(vFragmentNormal.xy, vFragmentNormal.xy),0.0));
+						vFragmentNormal.xy = transpose(mat2(m_texture)) * vFragmentNormal.xy;
+						vFragmentNormal = mTSB * vFragmentNormal;
+					}
+					
+					if(texture7Bound != 0)
+					{
+						vFragmentNormal.xy = texture2D(texUnit7, vTexCoords2).rg * 2.0 - 1.0;
+						vFragmentNormal.z = sqrt(max(1.0 - dot(vFragmentNormal.xy, vFragmentNormal.xy),0.0));
+						vFragmentNormal.xy = transpose(mat2(m_texture)) * vFragmentNormal.xy;
+						vFragmentNormal = mTSB * vFragmentNormal;
+					}
+				#endif
+			}
+		#endif
+		
+		// Check for compatibility alone as texture0Bound is not set for certain elements.
+		if(texture0Bound == 0)
+		{ 
+			#if ENVIRONMENT_MAP == 1
+				MainTextureColor.rgb = vec3(0.666667, 0.666667, 0.666667);
+				fEnvMapLevel = 1.0;	
+			#else
+				MainTextureColor = COLOR_WHITE;
+			#endif
+		}
+		else
+		{
+			MainTextureColor = texture2D(texUnit0,vTexCoords.xy);
+			MainTextureColor += texture2D(texUnit6,vTexCoords2.xy);
+			MainTextureColor *= 0.5;
+		
+			
+			//mod for slide shader
+			#if SLIDE_ALPHA == 0
+			vec2 vOrigCoords = vec2(vVertexTexCoords.xy);
+			MainTextureColor.a = texture2D(texUnit0, vOrigCoords.xy).a;
+			MainTextureColor.a += texture2D(texUnit6, vOrigCoords.xy).a;
+			MainTextureColor.a *= 0.8;
+			if (MainTextureColor.a < 0.5) discard;
+			MainTextureColor.a = 1.0;
+			#endif
+			//end mod for slide shader
+			
+			#if ENVIRONMENT_MAP == 1
+
+				fEnvMapLevel = 1.0-MainTextureColor.a;
+
+				#if FRAGMENT_LIGHTING == 1 && LIGHTING == 1
+					MainTextureColor.rgb = mix(MainTextureColor.rgb, vec3(0.666667, 0.666667, 0.666667), fEnvMapLevel);									
+				#endif
+
+			#endif
+			
+			MainTextureColor = ApplyColorSpace(MainTextureColor);
+		}
+				
+		// Only do this for vertex lighting - otherwise we apply environment maps as specular light instead.
+		#if ENVIRONMENT_MAP == 1
+				
+			#if SPECULAR_LIGHT != 1
+			
+				vec3 vTexEnvironment;
+				// If not normal mapped, we can use the coordinates from the vertex shader instead.
+				#if FRAGMENT_NORMAL != 1
+					if(envMapCube == 1)
+					{
+						vTexEnvironment = SampleEnvironmentMapCube(vVertexTexCoordsEnvironmentCube, 0.0);
+					}
+					else
+					{
+						vTexEnvironment = SampleEnvironmentMap(vVertexTexCoordsEnvironment, 0.0);
+					}
+				#else
+					if(envMapCube == 1)
+					{
+						vTexEnvironment = SampleEnvironmentMapCube(CalculateEnvironmentTexCoordsCube(vFragmentNormal), 0.0);
+					}
+					else
+					{
+						vTexEnvironment = SampleEnvironmentMap(CalculateEnvironmentTexCoords(vFragmentNormal), 0.0);
+					}
+				#endif 
+			
+				MainTextureColor.rgb = mix(MainTextureColor.rgb, vTexEnvironment.rgb, fEnvMapLevel);
+
+			#endif
+
+			FragmentColor.rgb *= MainTextureColor.rgb;
+		
+		#else
+
+			FragmentColor *= MainTextureColor;
+
+			AlphaDiscard(FragmentColor.a);
+
+		#endif
+
+	#endif
+
+	#if LIGHTING == 1
+
+		#if HEIGHT_MAP == 1
+			if(texture4Bound!=0)
+			{
+				SetupOcclusionFromTexture(vTexCoords, texUnit4);
+			}
+			else
+			{
+				SetupOcclusionBase();
+			}
+		#endif 
+
+		#if (FRAGMENT_LIGHTING == 1 || NORMAL_MAP == 1) && SPECULAR_LIGHT == 1
+		
+			SetupSpecularity(FragmentColor.rgb * materialFrontDiffuse.rgb);
+				
+		#endif
+
+	#endif
+}
+
+void main ()
+{
+	float moduleTime = scriptableFloat1;
+
+    FragmentColor = vec4(1.0);
+	SetupSlideShaderInputs();
+	ApplyStandardShader();
+	float fFragLum = ColorToBrightness(FragmentColor.rgb);
+	FragmentColor.rgb *= 1.0+1.41*fFragLum;
+
+	//FragmentColor.a /= 1.0-ColorToBrightness(FragmentColor.rgb/(0.12-FragmentColor.a));
+	//FragmentColor.a /= max(1.0-fFragLum, 0.1);
+	FragmentColor.a = max(min(FragmentColor.a, 1.0), 0.0);
+	if (FragmentColor.a < 0.1) discard;
+
+    gl_FragColor = FragmentColor;	
+}

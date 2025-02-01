@@ -1,0 +1,290 @@
+//=============================================================================
+//
+// inc_transform.shd
+//
+//=============================================================================
+
+#ifndef INC_TRANSFORM
+#define INC_TRANSFORM
+#include "inc_common"
+#include "inc_scriptable"
+
+///////////////////////////////////
+//
+// BEGIN INC_TRANSFORM
+//
+///////////////////////////////////
+
+#if POSTPROCESSING == 0
+
+varying vec3 vLocalNormal;
+varying vec3 vLocalPos;
+varying vec3 vPosWorldUV;
+
+varying vec4 vDirSun;
+varying vec4 vDirMoon;
+
+
+#if NORMAL_MAP == 1 || HEIGHT_MAP == 1
+
+	varying float fTextureHandedness;
+	varying vec3 vVertexTangent;
+
+	#if SHADER_TYPE == 1
+		attribute float fHandedness;
+		attribute vec3 vTangent;
+	#endif
+
+#endif
+
+#if SHADER_TYPE == 1
+
+///////////////////////////////////
+//
+// VERTEX SHADER ONLY FUNCTIONS
+//
+///////////////////////////////////
+
+#ifdef MOBILE
+	uniform 	mediump		vec4	 	m_boneRotations[MAX_NUM_BONES];
+	uniform 	mediump 	vec4	 	m_bonePositions[MAX_NUM_BONES];
+#else	
+	uniform 	highp 		mat4 		m_bones[MAX_NUM_BONES];
+#endif
+
+attribute vec4 vIndex;
+attribute vec4 vWeight;
+
+#ifndef CALC_SUN_MOON
+#define CALC_SUN_MOON 0
+#endif
+
+#ifdef MOBILE
+// Optimized version of vector rotation via quaternion
+vec3 rotateVector( vec4 quat, vec3 vec )
+{
+	return vec + 2.0 * cross( cross( vec, quat.xyz ) + quat.w * vec, quat.xyz );
+} 
+
+vec4 rotateAndTranslateBone(vec4 vPosition, int boneIndex)
+{
+	return vec4(rotateVector(m_boneRotations[boneIndex], vPosition.xyz), 0.0) + m_bonePositions[boneIndex];
+}
+
+#endif
+
+vec4 SkinmeshTransformPosition(vec4 vPosition, int nIndex)
+{
+	#ifdef MOBILE
+		return rotateAndTranslateBone(vPosition, nIndex);
+	#else
+		return m_bones[nIndex] * vPosition;
+	#endif
+}
+
+vec3 SkinmeshTransformOrientation(vec3 vVector, int nIndex)
+{
+	#ifdef MOBILE
+		return rotateVector(m_boneRotations[nIndex], vVector);
+	#else
+		return mat3(m_bones[nIndex]) * vVector;
+	#endif
+}
+
+uniform int skinmesh;
+void TransformMainCoordinates()
+{
+	vec4 vLocalPosition = vec4(0.0, 0.0, 0.0, 0.0);	
+	
+	vDirSun = scriptableVec1;
+	vDirMoon = scriptableVec2;
+
+
+	#if NORMAL_MAP == 1
+		vVertexTangent = vec3(0.0, 0.0, 0.0);
+	#endif
+	#if VERTEX_NORMAL == 1
+		vVertexNormal = vec3(0.0, 0.0, 0.0);
+	#endif
+	if(skinmesh == 1)
+	{
+		int index = 0;
+		
+		if(vWeight.x > 0.0)
+		{
+			index = int(vIndex.x);
+			vLocalPosition = SkinmeshTransformPosition(vPos, index) * vWeight.x;
+			#if NORMAL_MAP == 1
+				vVertexTangent = SkinmeshTransformOrientation(vTangent, index) * vWeight.x;
+			#endif
+			#if VERTEX_NORMAL == 1
+				vVertexNormal = SkinmeshTransformOrientation(vNormal, index) * vWeight.x;
+			#endif
+		}
+		if(vWeight.y > 0.0)
+		{
+			index = int(vIndex.y);
+			vLocalPosition += SkinmeshTransformPosition(vPos, index) * vWeight.y;
+			#if NORMAL_MAP == 1
+				vVertexTangent = SkinmeshTransformOrientation(vTangent, index) * vWeight.y + vVertexTangent;
+			#endif
+			#if VERTEX_NORMAL == 1
+				vVertexNormal = SkinmeshTransformOrientation(vNormal, index) * vWeight.y + vVertexNormal;
+			#endif
+		}
+		if(vWeight.z > 0.0)
+		{
+			index = int(vIndex.z);
+			vLocalPosition += SkinmeshTransformPosition(vPos, index) * vWeight.z;
+			#if NORMAL_MAP == 1
+				vVertexTangent = SkinmeshTransformOrientation(vTangent, index) * vWeight.z + vVertexTangent;
+			#endif
+			#if VERTEX_NORMAL == 1
+				vVertexNormal = SkinmeshTransformOrientation(vNormal, index) * vWeight.z + vVertexNormal;
+			#endif
+		}
+		if(vWeight.w > 0.0)
+		{
+			index = int(vIndex.w);
+			vLocalPosition += SkinmeshTransformPosition(vPos, index) * vWeight.w;
+			#if NORMAL_MAP == 1
+				vVertexTangent = SkinmeshTransformOrientation(vTangent, index) * vWeight.w + vVertexTangent;
+			#endif
+			#if VERTEX_NORMAL == 1
+				vVertexNormal = SkinmeshTransformOrientation(vNormal, index) * vWeight.w + vVertexNormal;
+			#endif
+		}
+	}
+	else
+	{
+		vLocalPosition = vPos;
+		#if VERTEX_NORMAL == 1
+			vVertexNormal = vNormal;
+		#endif
+		#if NORMAL_MAP == 1
+			vVertexTangent = vTangent;
+		#endif
+	}
+	
+	//save local vector normal
+	#if VERTEX_NORMAL == 1
+		vLocalNormal = vec3(vNormal);
+		vLocalPos = vec3(vLocalPosition.xyz);
+	#endif
+
+	
+	vec4 vPosProj;
+	vec4 vPosProjOrig;
+
+	#if POSITION_VIEW == 1
+		vPosView = (m_mv * vLocalPosition).xyz;
+		
+		//perspective shift
+		float fPerspectiveLimit = 0.0;
+		float fPerspectiveShift = 0.9; //0.95 // 0.9 also works
+		float fHeightShiftPerMeter = 0.9;
+
+		//store original
+		vec3 vPosViewOrig = vec3(vPosView);
+		
+		//do perspective shift
+		/*
+		if (vPosView.z < -fPerspectiveLimit) {
+			vPosView.z = -(pow(abs(vPosView.z)-fPerspectiveLimit,fPerspectiveShift)+fPerspectiveLimit);
+		}
+		*/
+		
+		//do elevation shift to make it look like the earth is curved a little bit in the distance
+		/*
+		if (vPosView.z < -45.5) {
+			float fCurvature = abs(vPosView.z + 45.5);
+			vPosView.y *= pow(0.995,fCurvature);
+		}
+		*/
+				
+		vPosProjOrig = m_proj * vec4(vPosViewOrig.x, vPosViewOrig.y, vPosViewOrig.z, 1.0);
+		vPosProj = m_proj * vec4(vPosView.x, vPosView.y, vPosView.z, 1.0);
+		
+
+		#if NORMAL_MAP == 1
+			// Rotate the tangent around the normal.
+			// Gram-Schmidt orthogonalization.
+			//vVertexTangent = vVertexTangent - vVertexNormal * fHandedness * (dot(vVertexTangent, vVertexNormal));
+			// The two fits nicely as:
+			//vVertexTangent = vVertexTangent * m_texture[0][0] - m_texture[0][0] * dot(vVertexNormal, vVertexTangent) * vVertexNormal + m_texture[1][0] * cross(vVertexNormal, vVertexTangent);
+			vVertexTangent = mat3(m_mv) * vVertexTangent;
+		#endif
+
+		#if VERTEX_NORMAL == 1
+			vVertexNormal = mat3(m_mv) * vVertexNormal;
+		#endif
+	
+	#else 
+	
+		vPosProj = m_mvp * vLocalPosition;
+		vPosProjOrig = vPosProj;
+	#endif
+
+
+	gl_Position = vPosProj;
+	
+	#if POSITION_WORLD == 1
+		vPosWorld = (m_vp_inv * vPosProj).xyz;
+		vPosWorldUV = (m_vp_inv * vPosProjOrig).xyz;
+	#endif 
+
+	//custom for sun/moon moving position and area lighting
+	#if CALC_SUN_MOON == 1
+	vDirSun = vec4(mat3(m_view) * vDirSun.xyz, 1.0); 
+	vDirMoon = vec4(mat3(m_view) * vDirMoon.xyz, 1.0); 
+	//vDirSun = vec4(normalize(mat3(m_mv) * vDirSun.xyz), 1.0); 
+	//vDirMoon = vec4(normalize(mat3(m_mv) * vDirMoon.xyz), 1.0);
+	#endif
+
+	#if NO_TEXTURE != 1
+
+		#if NORMAL_MAP == 1
+			fTextureHandedness = fHandedness;
+		#endif
+		
+
+		#if NO_TEXTURE_COORDS != 1
+			vVertexTexCoords = mat2(m_texture) * vTcIn.xy;
+		#else
+			vVertexTexCoords = vec2(0.5, 0.5);
+		#endif
+
+	#endif
+}
+
+#elif SHADER_TYPE == 2
+
+	#if NORMAL_MAP == 1 || HEIGHT_MAP == 1
+
+	mat3 SetupTSB()
+	{
+		// Construct our tangent-space basis matrix from the input data.
+		vec3 vTangent = vVertexTangent;
+		// Gram-Schmidt orthogonalization.
+		vTangent = normalize(vTangent - vSurfaceNormal * dot(vTangent, vSurfaceNormal));
+
+		vec3 vBitangent = cross(vSurfaceNormal, vTangent) * (2.0 * step(0.0, fTextureHandedness) - 1.0);
+		
+		mat3 mTSB;
+		mTSB[0] = vTangent;
+		mTSB[1] = vBitangent;
+		mTSB[2] = vSurfaceNormal;   
+		return mTSB;
+	}
+
+#endif
+#endif // SHADER_TYPE == 2
+#endif // POSTPROCESSING == 0
+
+///////////////////////////////////
+//     
+// END INC_TRANSFORM
+//
+///////////////////////////////////
+
+#endif 

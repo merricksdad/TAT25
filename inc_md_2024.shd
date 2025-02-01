@@ -1,0 +1,750 @@
+//==============================
+//			COMMON
+//==============================
+			
+
+			
+#ifndef GLOW_MAP
+	#define GLOW_MAP 0
+#endif
+
+#ifndef NUM_TEXTURES
+	#define NUM_TEXTURES 1
+#endif
+
+#if NUM_TEXTURES == 2
+	//front texture diffuse
+	uniform int texture6Bound;
+	uniform sampler2D texUnit6;
+	
+	//front texture normal
+	uniform int texture7Bound;
+	uniform sampler2D texUnit7;
+	
+	//front texture specular
+	uniform int texture8Bound;
+	uniform sampler2D texUnit8;
+	
+	//front texture roughness
+	uniform int texture9Bound;
+	uniform sampler2D texUnit9;
+
+	//front texture height
+	uniform int texture10Bound;
+	uniform sampler2D texUnit10;
+	
+	//front texture illum/glow
+	//!!! THIS CURRENTLY DOES NOT FUNCTION BECAUSE IT'S !!! 
+	//!!! USED BY SCREENSPACE DEPTH OR COLOR !!!
+	uniform int texture11Bound;
+	uniform sampler2D texUnit11;
+#endif
+
+#define HALF_PI 1.5708
+#define TWO_PI 6.2832
+
+attribute vec3 vNormal;	
+
+//At this distance, height mapping will be disabled
+//This feature saves some processing time when fog distance is higher and were height maps can waste a lot of time
+float fHeightMapMaxDistance = 45.0;
+
+//use this to mid-tone" far away textures rather than letting LOD mip maps get darker or lighter with blending 
+//tone forcing greater than 0.5 gives bias toward light, lower gives bias toward dark
+float fMidToneForcing = 0.3;
+
+//tone targets higher than 0.5 give preference toward light, lower gives preference toward dark
+float fMidToneTarget = 0.5;
+
+//applies the power function but retains the original sign, which allows proper float powers to be applied
+float spow (float fValue, float fPower)
+{
+	return sign(fValue) * pow(abs(fValue), fPower);
+}
+
+//applies the power function but retains the original sign, which allows proper float powers to be applied
+vec3 spow (vec3 vValue, float fPower)
+{
+	return vec3(
+		sign(vValue.x) * pow(abs(vValue.x), fPower),
+		sign(vValue.y) * pow(abs(vValue.y), fPower),
+		sign(vValue.z) * pow(abs(vValue.z), fPower)
+	);
+}
+
+//like normalization, except linear not spherical. 
+//All values must add to one. A + B + C = 1.0
+vec3 ToUnity(vec3 vValue)
+{
+	//prevent divide by zero
+	return vValue/max(abs(vValue.x) + abs(vValue.y) + abs(vValue.z), 0.0001);
+}
+
+float GetRadiansBetween(vec3 v1, vec3 v2){
+	return acos(dot(normalize(v1), normalize(v2)));	
+}
+
+float GetAngleBetween(vec3 v1, vec3 v2){
+	return degrees(GetRadiansBetween(v1, v2));
+}
+
+vec4 GetDiffuseMapValue(vec2 vTexCoords, int iMapChannel)
+{
+	vec4 vDiffuseColor;
+	#if NUM_TEXTURES == 1
+		if (texture0Bound !=0) vDiffuseColor = texture2D(texUnit0, vTexCoords);
+	#elif NUM_TEXTURES == 2
+		if (iMapChannel == 1  && texture0Bound != 0) vDiffuseColor = texture2D(texUnit0, vTexCoords);
+		else if (iMapChannel == 2 && texture6Bound !=0) vDiffuseColor = texture2D(texUnit6, vTexCoords);
+	#endif
+	
+	
+	if (fMidToneForcing != 0.0) {
+		float fragCameraDist = abs(vPosView.z);
+		float fForcingLevel = pow((fragCameraDist/100.0),2.0);
+
+		float fDiffuseLum = ColorToLuma(vDiffuseColor);
+		fDiffuseLum = fForcingLevel * fMidToneForcing * (fDiffuseLum  - fMidToneTarget);
+		
+		
+		vDiffuseColor -= fDiffuseLum;	
+	}
+	
+	
+	return vDiffuseColor;
+}
+
+vec2 GetNormalMapValue(vec2 vTexCoords, int iMapChannel)
+{
+	#if NUM_TEXTURES == 1
+		if (texture1Bound !=0) return texture2D(texUnit1, vTexCoords).rg * 2.0 - 1.0;
+	#elif NUM_TEXTURES == 2
+		if (iMapChannel == 1  && texture1Bound != 0) return texture2D(texUnit1, vTexCoords).rg * 2.0 - 1.0;
+		else if (iMapChannel == 2 && texture7Bound !=0) return texture2D(texUnit7, vTexCoords).rg * 2.0 - 1.0;
+	#endif
+}
+
+float GetSpecularMapValue(vec2 vTexCoords, int iMapChannel)
+{
+	#if NUM_TEXTURES == 1
+		if (texture2Bound !=0) return texture2D(texUnit2, vTexCoords).r;
+	#elif NUM_TEXTURES == 2
+		if (iMapChannel == 1  && texture2Bound != 0) return texture2D(texUnit2, vTexCoords).r;
+		else if (iMapChannel == 2 && texture8Bound !=0) return texture2D(texUnit8, vTexCoords).r;
+	#endif
+}
+
+float GetRoughnessMapValue(vec2 vTexCoords, int iMapChannel)
+{
+	#if NUM_TEXTURES == 1
+		if (texture3Bound !=0) return texture2D(texUnit3, vTexCoords).r;
+	#elif NUM_TEXTURES == 2
+		if (iMapChannel == 1  && texture3Bound != 0) return texture2D(texUnit3, vTexCoords).r;
+		else if (iMapChannel == 2 && texture9Bound !=0) return texture2D(texUnit9, vTexCoords).r;
+	#endif
+}
+
+float GetIlluminationMapValue(vec2 vTexCoords, int iMapChannel)
+{
+	#if NUM_TEXTURES == 1
+		if (texture5Bound !=0) return texture2D(texUnit5, vTexCoords).r;
+	#elif NUM_TEXTURES == 2
+		if (iMapChannel == 1  && texture5Bound != 0) return texture2D(texUnit5, vTexCoords).r;
+		else if (iMapChannel == 2 && texture11Bound !=0) return texture2D(texUnit11, vTexCoords).r;
+	#endif
+}		
+
+#if GLOW_MAP == 1
+	vec3 GetIlluminationMapColor(vec2 vTexCoords, int iMapChannel)
+	{
+		#if NUM_TEXTURES == 1
+			if (texture5Bound !=0) return texture2D(texUnit5, vTexCoords).rgb;
+		#elif NUM_TEXTURES == 2
+			if (iMapChannel == 1  && texture5Bound != 0) return texture2D(texUnit5, vTexCoords).rgb;
+			else if (iMapChannel == 2 && texture11Bound !=0) return texture2D(texUnit11, vTexCoords).rgb;
+		#endif
+	}		
+#endif
+
+float GetIlluminationMapValueFromSpecularMap(vec2 vTexCoords, int iMapChannel)
+{
+	#if NUM_TEXTURES == 1
+		if (texture2Bound !=0) return texture2D(texUnit2, vTexCoords).b;
+	#elif NUM_TEXTURES == 2
+		if (iMapChannel == 1 && texture2Bound != 0) return texture2D(texUnit2, vTexCoords).b;
+		else if (iMapChannel == 2 && texture8Bound !=0) return texture2D(texUnit8, vTexCoords).b;
+	#endif
+}	
+
+vec3 NormalFromFragmentXY (vec2 vNormal)
+{
+	vec3 tempNormal;
+	tempNormal.xy = vNormal.xy;
+	tempNormal.z = sqrt(max(1.0 - dot(tempNormal.xy, tempNormal.xy),0.0));
+	return tempNormal;
+}
+
+mat3 SetupTSB_EX()
+{
+    // Construct our tangent-space basis matrix from the input data.
+    vec3 vTangent = vVertexTangent;
+    // Gram-Schmidt orthogonalization.
+     vTangent = normalize(vTangent - vSurfaceNormal * dot(vTangent, vSurfaceNormal));
+
+    vec3 vBitangent = cross(vSurfaceNormal, vTangent) * (2.0 * step(0.0, fTextureHandedness) - 1.0);
+	
+    mat3 mTSB;
+    mTSB[0] = vTangent;
+    mTSB[1] = vBitangent;
+    mTSB[2] = vSurfaceNormal;   
+    return mTSB;
+}
+
+float ColorToChroma(vec3 vColorIn)
+{
+	float fMax = max(max(vColorIn.r, vColorIn.g), vColorIn.b);
+	float fMin = min(min(vColorIn.r, vColorIn.g), vColorIn.b);
+	float fDelta = fMax-fMin;
+	float fLum = (fMax+fMin)/2.0;
+	float fBottom = 1.0 - abs((2.0 * fLum) - 1.0);
+	if (fBottom == 0.0) {
+		return 0.0;
+	} else {
+		return fDelta/fBottom;
+	}
+}
+
+
+
+//==============================
+//	    SUN AND MOON
+//==============================
+
+//store the angle between sun and this frag
+float fSunFragAngle;
+
+//area sun and moon data
+vec3 vPosSun;
+vec3 vSunColor;
+vec3 vPosMoon;
+vec3 vMoonColor;
+
+//position of frag relative to player-relative
+vec3 vPosFrag;
+
+//module time
+float moduleTime;
+
+//==============================
+//			LIGHTING
+//==============================
+
+
+//inputs are total frag color so far, and its normal vector
+void ComputeLightingEx(inout vec4 ColorIO, vec3 vNormalThis)
+{
+	
+	AmbientLight = lightAreaAmbient;
+	
+	float fFogAlpha = GetFogAlpha(fFogFragCoord);	
+	
+	DiffuseLight = COLOR_BLACK.rgb;
+	
+	#if FRAGMENT_LIGHTING == 0
+		StaticLight = COLOR_BLACK.rgb;
+	#endif
+	
+	#if LIGHT_SUBSURFACE_SCATTERING == 1
+	SubsurfaceLight = COLOR_BLACK.rgb;
+	#endif
+	
+	#ifdef LIGHT_TRANSLUCENCE_GENERATE_VALUE
+		// Default is to scale back light with inverse transparency.
+		LIGHT_TRANSLUCENCE_VALUE = (1.0-ColorIO.a);
+	#endif
+
+	
+	#if SPECULAR_LIGHT == 1
+
+		SpecularLight = COLOR_BLACK.rgb;
+
+		fNdotV = dot(vNormalThis, -vViewToSurface_n);
+		if(fNdotV < 0.0)
+		{
+			vNormalThis = normalize(vNormalThis + fNdotV * vViewToSurface_n);
+			fNdotV = 0.0;
+		}
+		fRoughness_sq = MATERIAL_ROUGHNESS_VALUE * MATERIAL_ROUGHNESS_VALUE;		
+		
+		fRoughness_sq_inv = 1.0-fRoughness_sq;
+		
+		#if SPECULAR_GEOMETRIC_SHADOWING_TERM == 1
+			fGeomTerm = MATERIAL_ROUGHNESS_VALUE * 0.5;
+		#elif SPECULAR_GEOMETRIC_SHADOWING_TERM == 2
+			fGeomTerm = sqr(sqrt(MATERIAL_ROUGHNESS_VALUE)*0.5 + 0.5) * 0.5;
+		#elif SPECULAR_GEOMETRIC_SHADOWING_TERM == 3
+			fGeomTerm = MATERIAL_ROUGHNESS_VALUE * 0.65;
+		#elif SPECULAR_GEOMETRIC_SHADOWING_TERM == 4
+			fGeomTerm = MATERIAL_ROUGHNESS_VALUE * 0.425;
+		#endif
+		
+		fGeomTerm_inv = 1.0-fGeomTerm;
+		
+		#if SPECULAR_DISTRIBUTION_MODEL == 0
+
+			// Determine shininess for Blinn-Phong.
+			fShininess = 2.0 / (fRoughness_sq + 0.001) - 2.0;			
+
+		#endif
+
+	#endif
+
+	#if FRAGMENT_LIGHTING == 0
+		#if SHADER_TYPE == 1
+
+			if(staticLighting == 1)
+			{
+				StaticLight = ApplyColorSpace(vColor.rgb);
+			}	
+			
+		#elif SHADER_TYPE == 2 && NORMAL_MAP == 1
+
+			if(staticLighting == 1)
+			{
+				ComputeDiffuseLighting(VertexStaticLighting.rgb, vStaticLightDirOut, vNormalThis, 1.0, true);
+			}
+
+		#endif
+
+	#endif
+	
+	//computes sun/moon differently from a normal point source
+	//float fDayLight = min(max(PI * sin(PI * moduleTime/24.0) - 0.77, 0.0), (PI/2.0)) ;
+	//float fMoonLight = min(max(PI * -sin(PI * moduleTime/24.0) + 1.0, 0.0), (PI/2.0));
+	
+	float fDayNightCycle = 1.0-(2.0*(abs((moduleTime/24.0)-0.5)));
+	//fDayNightCycle = pow(fDayNightCycle, 0.5);
+	
+	//float fDayLight = min(1.5*fDayNightCycle, 1.2);
+	//float fMoonLight = 1.0-min(fDayNightCycle, 1.0);
+	
+	float fDayLight = min(PI * max(1.0-pow(1.0-vPosSun.z,PI),0.0), 1.2);
+	float fMoonLight = min(PI * max(1.0-pow(1.0-vPosMoon.z,PI), 0.0), 1.0);
+	fMoonLight *= 1.0-fDayLight;
+	
+	//fMoonLight = 0.0;
+		
+	//factor in moon phase
+	float fPhaseGlow = 2.0*pow((2.0*(-abs((moduleDay/28.0)-0.5)+0.5)),0.5);
+	//fMoonLight *= fPhaseGlow;
+		
+
+	//original 
+	//ComputeDiffuseLighting(lightAreaDiffuse, lightAreaDiffuseDirection, vNormalThis, 1.0, false);
+
+	//this needs to be replaced so that sun and moon can both be properly registered separately without any swapping flicker
+	ComputeDiffuseLighting(vSunColor.rgb, normalize(vDirSun.xyz), vNormalThis, fDayLight, false);
+	ComputeDiffuseLighting(vMoonColor.rgb, normalize(vDirMoon.xyz), vNormalThis, fMoonLight, false);	
+	
+
+	//normally indirectional lighting will not know where the sun is 
+	//use this to force the sun's extra bright light to cause camera-relative shadowing
+	//instead of face-relative shadowing	
+	#if LIGHT_FORCE_INDIRECTIONAL == 1	
+		#if FOLIAGE_SHADER == 1
+			#include "inc_plantlight"
+		#endif
+	#endif	
+	
+	//force nightly darkening 
+	float fEnforceDark = pow(clamp(0.5*fMoonLight+fDayLight, 0.0, 1.0), 3.0);
+	AmbientLight.xyz *= fEnforceDark;
+	DiffuseLight.xyz *= fEnforceDark;
+	
+	//custom force higher diffuse and contrast
+	DiffuseLight = min(DiffuseLight, fDayLight+fMoonLight);	
+	#if LIGHT_FORCE_INDIRECTIONAL == 0
+	DiffuseLight *= (length(vNormalThis*vNormalThis*vNormalThis) * fDayLight * vSunColor * vSunColor);
+	#else
+	//DiffuseLight *= (length(vNormalThis*vNormalThis*vNormalThis) * fDayLight * vSunColor * vSunColor);
+	#endif
+	
+	//force minimum diffuse = ambient 
+	float fAmbLum = ColorToBrightness(AmbientLight);
+	float fDifLum = ColorToBrightness(DiffuseLight);
+	if (fDifLum<fAmbLum) DiffuseLight += (fAmbLum-fDifLum) * AmbientLight;
+	
+	//force minimum gray light
+	if (fDifLum<0.01) DiffuseLight += 0.01;	
+	
+	for (int i = 0; i < numLights; i++) 
+	{			
+		vec3 vLightDir = lightPosition[i].xyz - vPosView;
+		#if GAMMA_CORRECTION == 1
+			if(lightColor[i].a < 0.0)
+			{
+				ComputePointLightSource(lightColor[i].rgb, lightPosition[i].xyz - vPosView, -lightColor[i].a, vNormalThis, true);	
+			}
+			else
+			{
+				ComputePointLightSource(lightColor[i].rgb, lightPosition[i].xyz - vPosView, lightColor[i].a, vNormalThis, false);	
+			}
+		#else
+			if(dot(abs(lightAmbient[i].rgb), vec3(1.0, 1.0, 1.0)) == 0.0)
+			{
+				ComputePointLightSource(lightDiffuse[i].rgb, lightPosition[i].xyz - vPosView, lightQuadraticAtten[i], vNormalThis, false);	
+			}
+			else
+			{
+				ComputePointLightSource(lightAmbient[i].rgb, lightPosition[i].xyz - vPosView, lightQuadraticAtten[i], vNormalThis, true);	
+			}
+		#endif
+	}
+	
+	
+	//custom modified to force higher ambient from strong light sources
+	//AmbientLight *= (fDayLight+fMoonLight)*materialFrontAmbient.rgb;
+	
+	//custom modified to force ambient light to scatter in a diffuse way from the viewer
+	//this should force some normal mapping to show on otherwise poorly lit objects
+	ComputeDiffuseLighting(AmbientLight.rgb, normalize(cameraFocus.xyz), vNormalThis, 2.0*ColorToBrightness(AmbientLight), false);
+	//AmbientLight *= 0.95;
+
+
+	
+	//custom modified force higher ambient contrast
+	//AmbientLight *= 1.0+AmbientLight;
+	
+				
+	DiffuseLight = 
+				#if LIGHT_FORCE_INDIRECTIONAL == 1
+				(1.0 / (PI) ) * 
+				#endif
+				(
+				DiffuseLight
+				#if FRAGMENT_LIGHTING == 0
+					+ StaticLight
+				#endif
+				) 
+				* materialFrontDiffuse.rgb;
+					
+
+				
+	#if LIGHT_SUBSURFACE_SCATTERING == 1
+	SubsurfaceLight = materialFrontDiffuse.rgb * 
+						(
+							SubsurfaceLight
+							#if FRAGMENT_LIGHTING == 0
+							+ StaticLight
+							#endif
+						)
+						/ (1.0 + LIGHT_SUBSURFACE_SCATTERING_WRAP)
+						+ AmbientLight;
+	
+	const float fEnergyPreservation = (2.0 * (1.0+LIGHT_SUBSURFACE_SCATTERING_WRAP) / (2.0 + PI * LIGHT_SUBSURFACE_SCATTERING_WRAP));
+	SubsurfaceLight *= fEnergyPreservation;
+
+	#endif				
+
+	#if SPECULAR_LIGHT == 1
+		vec3 EnvironmentColor = AmbientLight + DiffuseLight;
+
+		SpecularLight *= GetSpecularBaseModifier();
+
+		#if SPECULAR_FRESNEL != 0 
+			// Naive implementation of Fresnel effect on GI.
+			float fEnvironmentSpecularity = mix(GetFresnelSpecularity(MATERIAL_SPECULARITY_VALUE, fNdotV), MATERIAL_SPECULARITY_VALUE, sqrt(MATERIAL_ROUGHNESS_VALUE));
+		#else
+			#define fEnvironmentSpecularity MATERIAL_SPECULARITY_VALUE
+		#endif
+		
+		#if SPECULAR_FRESNEL != 1
+			// Use environment fresnel for all lights.
+			SpecularLight *= fEnvironmentSpecularity;
+		#endif 		
+	
+		#if SHADER_TYPE == 2
+
+			vec3 vTexEnvironment;
+			#if FRAGMENT_NORMAL != 1 && SHADER_QUALITY_MODE < 2
+				if(envMapCube == 1)
+				{
+					vTexEnvironment = SampleEnvironmentMapCube(vVertexTexCoordsEnvironmentCube,clamp(MATERIAL_ROUGHNESS_VALUE*fEnvironmentMapRoughnessLODModifier + fEnvironmentMapRoughnessLODOffset, 0.0, fEnvironmentMapCubeRoughnessLODMax));
+				}
+				else
+				{
+					vTexEnvironment = SampleEnvironmentMap(vVertexTexCoordsEnvironment,clamp(MATERIAL_ROUGHNESS_VALUE*fEnvironmentMapRoughnessLODModifier + fEnvironmentMapRoughnessLODOffset, 0.0, fEnvironmentMapRoughnessLODMax));
+				}
+			#else
+				if(envMapCube == 1)
+				{
+					vTexEnvironment = SampleEnvironmentMapCube(CalculateEnvironmentTexCoordsCube(vNormalThis),clamp(MATERIAL_ROUGHNESS_VALUE*fEnvironmentMapRoughnessLODModifier + fEnvironmentMapRoughnessLODOffset, 0.0, fEnvironmentMapCubeRoughnessLODMax));
+				}
+				else
+				{	
+					vTexEnvironment = SampleEnvironmentMap(CalculateEnvironmentTexCoords(vNormalThis),clamp(MATERIAL_ROUGHNESS_VALUE*fEnvironmentMapRoughnessLODModifier + fEnvironmentMapRoughnessLODOffset, 0.0, fEnvironmentMapRoughnessLODMax));
+				}
+			#endif
+				
+			EnvironmentColor *= vTexEnvironment.rgb;
+			
+			
+		#else
+
+			float fGammaFactor = ApplyColorSpace(0.6667);
+
+			EnvironmentColor*= COLOR_WHITE.rgb * fGammaFactor; 
+			
+		#endif
+		
+		SpecularLight += EnvironmentColor 
+						#if HEIGHT_MAP == 1 && SHADER_TYPE == 2
+						* fAmbientOcclusionModifier
+						#endif
+						* fEnvironmentSpecularity;
+	#endif
+	
+	#if HEIGHT_MAP == 1 && SHADER_TYPE == 2
+
+
+	AmbientLight *= fAmbientOcclusionModifier;
+	
+	#endif	
+	
+
+	
+	vec3 TotalLight = materialFrontEmissive.rgb + 
+				#if SPECULAR_LIGHT == 1
+					(1.0 - fEnvironmentSpecularity) * 
+				#endif
+					(AmbientLight
+					+ DiffuseLight)
+				;  
+				
+	// Backward compatibility, mainly needed for some GUI elements.
+	TotalLight = max(TotalLight, min(frontLightModelProductSceneColor.rgb * materialFrontDiffuse.rgb, COLOR_WHITE.rgb));
+
+	/* custom: removed for 3 axis shader because it won't work for 2nd texture set
+	#if SHADER_TYPE == 2 && SELF_ILLUMINATION_MAP == 1 
+
+		// This approach takes the input color (usually the diffuse map) and apply it as lighting, 
+		// while subtracting this from the input color base for other light calculations.
+
+		#if MATERIAL_READ_SELF_ILLUMINATION_FROM_SPECULAR_MAP == 1
+			if(texture2Bound != 0)
+			{
+				TotalLight = mix(TotalLight, COLOR_WHITE.rgb, texture2D(texUnit2, vTexCoords).b);
+			}
+		#endif
+
+	#endif
+	*/
+
+	#if GAMMA_CORRECTION == 0
+		TotalLight = clamp(TotalLight, 0.0, 1.0);
+	#endif
+
+	ColorIO.rgb*=TotalLight;
+
+	/* custom: removed for 3 axis shader because it won't work for second texture set
+	#if SHADER_TYPE == 2 && SELF_ILLUMINATION_MAP == 1 
+
+		#if MATERIAL_READ_SELF_ILLUMINATION_FROM_SPECULAR_MAP != 1
+			if(texture5Bound != 0)
+			{
+				ColorIO.rgb += ApplyColorSpace(texture2D(texUnit5, vTexCoords).rgb);
+			}
+		#endif
+
+	#endif
+	*/
+	
+	#if SPECULAR_LIGHT == 1
+
+		if(ColorIO.a < 1.0 && ColorIO.a > 0.001)
+		{
+			// Specularity ignores material transparency. We emulate this by compensating.
+			SpecularLight /= max(ColorIO.a, 0.1);
+		}
+
+
+		ColorIO.rgb += MATERIAL_SPECULAR_COLOR_VALUE * SpecularLight;
+		
+	#endif
+
+	// Debugging outputs.
+	
+	#if SHADER_DEBUG_MODE > 0
+	
+		#if SHADER_DEBUG_MODE == SHADER_DEBUG_MODE_LIGHT_TOTAL
+			ColorIO.rgb = TotalLight
+						#if SPECULAR_LIGHT == 1
+							+ MATERIAL_SPECULAR_COLOR_VALUE * SpecularLight
+						#endif
+							;
+		#elif SHADER_DEBUG_MODE == SHADER_DEBUG_MODE_LIGHT_STATIC
+			#if FRAGMENT_LIGHTING == 1
+				ColorIO.rgb = COLOR_BLACK.rgb;
+			#else
+				ColorIO.rgb = 
+					#if SPECULAR_LIGHT == 1
+					(1.0 - MATERIAL_SPECULARITY_VALUE) *
+					#endif
+					StaticLight * materialFrontDiffuse.rgb;		
+			#endif
+		#elif SHADER_DEBUG_MODE == SHADER_DEBUG_MODE_LIGHT_AMBIENT
+			ColorIO.rgb = AmbientLight;
+		#elif SHADER_DEBUG_MODE == SHADER_DEBUG_MODE_LIGHT_DIFFUSE
+			ColorIO.rgb = DiffuseLight;
+		#elif SHADER_DEBUG_MODE == SHADER_DEBUG_MODE_LIGHT_SPECULAR && SPECULAR_LIGHT == 1
+			ColorIO.rgb = MATERIAL_SPECULAR_COLOR_VALUE * SpecularLight;
+		#endif
+	
+	#endif
+}
+
+void ApplyBetterFog(inout vec4 colorIO)
+{	
+	//return;
+	//construct special fog
+	float fLum = ColorToBrightness(colorIO.rgb);
+	float fFogAlpha = GetFogAlpha(fFogFragCoord);
+	/*
+	float fFogPower = (1.0-pow(fLum+0.25, 3.0))-(0.25*(1.0-fLum));
+	fFogPower = max(min(fFogPower, 1.0), fFogAlpha);
+	fFogPower *= fFogAlpha;
+	fFogPower = min(0.9, fFogPower);
+	fFogPower = fFogAlpha;
+	*/
+
+	//sun brighness region increases toward noon
+	float fSunPinch = abs(moduleTime-12.0);	
+	
+	//prevent sun fogging at night by shifting daylight hours from 4 to 8
+	float fSunBlock = fSunPinch; //midnight = 12, noon = 0
+	fSunBlock /= 12.0;
+	fSunBlock = 1.0-fSunBlock; //midnight = 0, noon = 1
+	fSunBlock *= 2.0;
+	fSunBlock -= 1.0; //midnight = -1, noon = 1, 6am/pm = 0
+	//fSunBlock += 0.32; //4 am/8pm = 0
+	fSunBlock += 0.35; 
+	//fSunBlock += 0.416; //330 am/830pm = 0
+	//fSunBlock += 0.5; //3 am/9pm = 0
+	fSunBlock = min(fSunBlock, 1.0); //noon = 1
+	
+	
+	//sun region gains sun diffuse color 		
+	float fSunMix;
+	/*
+	//as long as the sun is not blocked
+	if (fSunBlock>0.0) {
+		//get the sun's glow in the sky
+		fSunMix = abs(GetAngleBetween(vPosSun, vPosFrag.xyz));
+		fSunMix = min(fSunMix, 90.0);
+		fSunMix /= 90.0;
+		fSunMix = 1.0 - fSunMix;
+		fSunMix = max(fSunMix, 0.0);
+		
+		//pinch sun by hour of daylight
+		fSunMix *= 1.0-pow(fSunBlock, 6.0);
+		fSunMix = pow(fSunMix, 6.0);
+		//fSunMix /= 2.0*fSunBlock;
+		//fSunMix *= 1.5;
+				
+		//sun fog mix pinches out by distance 
+		
+		float fragCameraDist = abs(vPosView.z);
+		if (fSunMix > 0.0 ){
+			float fSunFogPinch = 1.0-fFogAlpha*fFogAlpha;
+			fSunMix *= PI*fSunFogPinch*fSunBlock;
+			
+			//pinch sun fogging within specified distance so it does not look wierd behind hills
+			//make pinch distance increase with hour into night 
+			//fFogPinchDist *= 1.5+(1.0-(fSunBlock*fSunBlock));
+			//if (fragCameraDist < fFogPinchDist) {
+			//	fSunMix *= pow(abs(fragCameraDist/fFogPinchDist), 10.0);
+			//}
+		}	
+	}
+	*/
+	
+	//fSunMix = min(fSunMix, 2.0);
+	//fSunMix *=0.5;
+	
+	//transition area fog to sun color near sun
+	vec3 vMyFogColor;
+	vMyFogColor = mix(fogColor.rgb, vSunColor.rgb, fSunMix);
+		
+	//force darkening/lightening equal to half fogging
+	//simulates day/night white balance for the eye
+	float fCosDay = cos(PI*(moduleTime+2.0)/12.0);
+	if (fCosDay < 0.0) {
+		//darken in sunlight
+		colorIO.rgb *= (1.0-(0.5*fFogAlpha * abs(fCosDay))) ;
+	} else {
+		//lighten in moonlight
+		colorIO.rgb /= (1.0-(0.5*fFogAlpha * abs(fCosDay)));
+	}
+	
+	//mix in blended fog
+	//colorIO.rgb = mix(colorIO.rgb, vMyFogColor.rgb, fFogPower);
+	colorIO.rgb = mix(colorIO.rgb, vMyFogColor.rgb, fFogAlpha);
+	
+	
+
+	//colorIO.rgb = mix(colorIO.rgb, fogColor.rgb, fFogPower*fFogAlpha);
+	//colorIO.rgb = mix(colorIO.rgb, fogColor.rgb, fFogAlpha);
+}
+
+
+void SetupSunAndMoon()
+{
+	//get time
+	moduleTime = scriptableFloat1;
+	
+
+	//get sun position from module
+	vPosSun = scriptableVec1.xyz;
+	vSunColor = scriptableVec3.xyz;
+
+	//get moon position from module
+	vPosMoon = scriptableVec2.xyz;
+	vMoonColor = scriptableVec4.xyz;
+	
+	//convert frag position to player-relative position
+	vPosFrag = (vPosWorldUV.xyz - playerPosition.xyz);	
+
+	//get the angle between the sun center and the fragment
+	fSunFragAngle = GetRadiansBetween(vPosFrag, vPosSun);
+}
+
+void ApplySpecialShader()
+{
+	SetupSunAndMoon();
+
+	#if LIGHTING == 1
+		#if FRAGMENT_LIGHTING == 1 || FRAGMENT_NORMAL == 1		
+			ComputeLightingEx(FragmentColor, vFragmentNormal);
+		#endif
+	#endif
+	
+	#if POSITION_WORLD == 1 || POSITION_VIEW == 1
+		ApplyTargetGroundHighlighting(FragmentColor);
+	#endif
+
+	#if KEYHOLING == 1
+		ApplyKeyhole(FragmentColor);
+	#endif
+	
+
+	FragmentColor.rgb = RevertColorSpace(FragmentColor.rgb);	
+
+	#if FOG == 1
+		ApplyFog(FragmentColor);
+		//ApplyBetterFog(FragmentColor);
+	#endif
+	
+	#if GAMMA_CORRECTION == 1
+		ApplyColorTonemap(FragmentColor);
+	#endif    
+}
