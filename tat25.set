@@ -24,6 +24,7 @@ UnlocalizedName=Dune
 
 [TERRAIN1]
 Name=sscliff
+StrRef=-1
 UnlocalizedName=Sandstone Cliff
 
 [TERRAIN2]
@@ -33,7 +34,7 @@ UnlocalizedName=Sandstone Spire
 
 [TERRAIN3]
 Name=alluvial
-StrRef=0
+StrRef=-1
 UnlocalizedName=Dry Alluvial
 
 [TERRAIN4]
