@@ -14,6 +14,15 @@ Floor=dune
 
 [GRASS]
 Grass=0
+GrassTextureName=grass	
+Density=5.000
+Height=1.200
+AmbientRed=0.500
+AmbientGreen=0.600
+AmbientBlue=0.300
+DiffuseRed=0.500
+DiffuseGreen=0.600
+DiffuseBlue=0.300	
 
 [TERRAIN TYPES]
 Count=12
@@ -98,12 +107,12 @@ UnlocalizedName=~Sharp/Dune Crest
 [CROSSER3]
 Name=stream
 StrRef=-1
-UnlocalizedName=Stream
+UnlocalizedName=~Stream
 
 [CROSSER4]
 Name=drystream
 StrRef=-1
-UnlocalizedName=Dry Stream
+UnlocalizedName=~Dry Stream
 
 [PRIMARY RULES]
 Count=0
@@ -177,7 +186,6 @@ BottomLeftHeight=0
 BottomRightHeight=1
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE2]
 Model=tat25_b02_01
@@ -210,7 +218,6 @@ BottomLeftHeight=1
 BottomRightHeight=1
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE3]
 Model=tat25_b03_01
@@ -243,7 +250,6 @@ BottomLeftHeight=1
 BottomRightHeight=1
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE4]
 Model=tat25_b04_01
@@ -276,7 +282,6 @@ BottomLeftHeight=1
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE5]
 Model=tat25_b06_01
@@ -309,7 +314,6 @@ BottomLeftHeight=0
 BottomRightHeight=1
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE6]
 Model=tat25_b08_01
@@ -342,7 +346,6 @@ BottomLeftHeight=0
 BottomRightHeight=2
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE7]
 Model=tat25_b09_01
@@ -375,7 +378,6 @@ BottomLeftHeight=1
 BottomRightHeight=1
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE8]
 Model=tat25_b10_01
@@ -408,7 +410,6 @@ BottomLeftHeight=1
 BottomRightHeight=1
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE9]
 Model=tat25_b11_01
@@ -441,7 +442,6 @@ BottomLeftHeight=1
 BottomRightHeight=-1
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE10]
 Model=tat25_b11_02
@@ -474,7 +474,6 @@ BottomLeftHeight=1
 BottomRightHeight=-1
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE11]
 Model=tat25_b13_01
@@ -507,7 +506,6 @@ BottomLeftHeight=0
 BottomRightHeight=2
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE12]
 Model=tat25_b14_01
@@ -540,7 +538,6 @@ BottomLeftHeight=1
 BottomRightHeight=2
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE13]
 Model=tat25_b15_01
@@ -573,7 +570,6 @@ BottomLeftHeight=0
 BottomRightHeight=2
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE14]
 Model=tat25_b17_01
@@ -606,7 +602,6 @@ BottomLeftHeight=1
 BottomRightHeight=2
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE15]
 Model=tat25_b18_01
@@ -639,7 +634,6 @@ BottomLeftHeight=2
 BottomRightHeight=1
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE16]
 Model=tat25_b20_01
@@ -672,7 +666,6 @@ BottomLeftHeight=0
 BottomRightHeight=1
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE17]
 Model=tat25_b21_01
@@ -705,7 +698,6 @@ BottomLeftHeight=1
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE18]
 Model=tat25_b23_01
@@ -738,7 +730,6 @@ BottomLeftHeight=1
 BottomRightHeight=1
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE19]
 Model=tat25_b24_01
@@ -771,7 +762,6 @@ BottomLeftHeight=1
 BottomRightHeight=1
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE20]
 Model=tat25_b26_01
@@ -804,7 +794,6 @@ BottomLeftHeight=2
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE21]
 Model=tat25_b28_01
@@ -837,7 +826,6 @@ BottomLeftHeight=0
 BottomRightHeight=2
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE22]
 Model=tat25_b29_01
@@ -870,7 +858,6 @@ BottomLeftHeight=1
 BottomRightHeight=1
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE23]
 Model=tat25_b30_01
@@ -903,7 +890,6 @@ BottomLeftHeight=1
 BottomRightHeight=1
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE24]
 Model=tat25_b31_01
@@ -936,7 +922,6 @@ BottomLeftHeight=1
 BottomRightHeight=-1
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE25]
 Model=tat25_b33_01
@@ -969,7 +954,6 @@ BottomLeftHeight=0
 BottomRightHeight=2
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE26]
 Model=tat25_b34_01
@@ -1002,7 +986,6 @@ BottomLeftHeight=0
 BottomRightHeight=2
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE27]
 Model=tat25_b36_01
@@ -1035,7 +1018,6 @@ BottomLeftHeight=1
 BottomRightHeight=1
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE28]
 Model=tat25_b37_01
@@ -1068,7 +1050,6 @@ BottomLeftHeight=1
 BottomRightHeight=1
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE29]
 Model=tat25_b39_01
@@ -1101,7 +1082,6 @@ BottomLeftHeight=1
 BottomRightHeight=1
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE30]
 Model=tat25_b40_01
@@ -1134,7 +1114,6 @@ BottomLeftHeight=1
 BottomRightHeight=1
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE31]
 Model=tat25_b26_02
@@ -1167,7 +1146,6 @@ BottomLeftHeight=2
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE32]
 Model=tat25_c01_01
@@ -1200,7 +1178,6 @@ BottomLeftHeight=0
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE33]
 Model=tat25_c02_01
@@ -1233,7 +1210,6 @@ BottomLeftHeight=0
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE34]
 Model=tat25_d01_01
@@ -1266,7 +1242,6 @@ BottomLeftHeight=0
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE35]
 Model=tat25_d02_01
@@ -1299,7 +1274,6 @@ BottomLeftHeight=0
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE36]
 Model=tat25_d03_01
@@ -1332,7 +1306,6 @@ BottomLeftHeight=0
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE37]
 Model=tat25_d04_01
@@ -1365,7 +1338,6 @@ BottomLeftHeight=0
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE38]
 Model=tat25_d06_01
@@ -1398,7 +1370,6 @@ BottomLeftHeight=0
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE39]
 Model=tat25_d07_01
@@ -1431,7 +1402,6 @@ BottomLeftHeight=0
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE40]
 Model=tat25_d08_01
@@ -1464,7 +1434,6 @@ BottomLeftHeight=0
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE41]
 Model=tat25_d09_01
@@ -1497,7 +1466,6 @@ BottomLeftHeight=0
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE42]
 Model=tat25_d11_01
@@ -1530,7 +1498,6 @@ BottomLeftHeight=0
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE43]
 Model=tat25_d12_01
@@ -1563,7 +1530,6 @@ BottomLeftHeight=0
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE44]
 Model=tat25_d14_01
@@ -1596,7 +1562,6 @@ BottomLeftHeight=0
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE45]
 Model=tat25_d15_01
@@ -1629,7 +1594,6 @@ BottomLeftHeight=0
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE46]
 Model=tat25_d17_01
@@ -1662,7 +1626,6 @@ BottomLeftHeight=0
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE47]
 Model=tat25_d19_01
@@ -1695,7 +1658,6 @@ BottomLeftHeight=0
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE48]
 Model=tat25_d20_01
@@ -1728,7 +1690,6 @@ BottomLeftHeight=0
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE49]
 Model=tat25_e01_01
@@ -1761,7 +1722,6 @@ BottomLeftHeight=0
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE50]
 Model=tat25_e02_01
@@ -1794,7 +1754,6 @@ BottomLeftHeight=0
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE51]
 Model=tat25_e03_01
@@ -1827,7 +1786,6 @@ BottomLeftHeight=0
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE52]
 Model=tat25_f01_01
@@ -1860,7 +1818,6 @@ BottomLeftHeight=0
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE53]
 Model=tat25_f02_01
@@ -1893,7 +1850,6 @@ BottomLeftHeight=0
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE54]
 Model=tat25_f03_01
@@ -1926,7 +1882,6 @@ BottomLeftHeight=0
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE55]
 Model=tat25_f04_01
@@ -1959,7 +1914,6 @@ BottomLeftHeight=0
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE56]
 Model=tat25_g01_01
@@ -1992,7 +1946,6 @@ BottomLeftHeight=0
 BottomRightHeight=1
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE57]
 Model=tat25_g02_01
@@ -2025,7 +1978,6 @@ BottomLeftHeight=0
 BottomRightHeight=1
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE58]
 Model=tat25_g03_01
@@ -2058,7 +2010,6 @@ BottomLeftHeight=0
 BottomRightHeight=1
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE59]
 Model=tat25_g05_01
@@ -2091,7 +2042,6 @@ BottomLeftHeight=1
 BottomRightHeight=1
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE60]
 Model=tat25_g06_01
@@ -2124,7 +2074,6 @@ BottomLeftHeight=1
 BottomRightHeight=1
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE61]
 Model=tat25_g07_01
@@ -2157,7 +2106,6 @@ BottomLeftHeight=1
 BottomRightHeight=1
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE62]
 Model=tat25_g07_02
@@ -2190,7 +2138,6 @@ BottomLeftHeight=1
 BottomRightHeight=1
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE63]
 Model=tat25_g09_01
@@ -2223,7 +2170,6 @@ BottomLeftHeight=1
 BottomRightHeight=1
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE64]
 Model=tat25_g10_01
@@ -2256,7 +2202,6 @@ BottomLeftHeight=1
 BottomRightHeight=1
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE65]
 Model=tat25_g11_01
@@ -2289,7 +2234,6 @@ BottomLeftHeight=1
 BottomRightHeight=1
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE66]
 Model=tat25_g13_01
@@ -2322,7 +2266,6 @@ BottomLeftHeight=1
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE67]
 Model=tat25_g14_01
@@ -2355,7 +2298,6 @@ BottomLeftHeight=1
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE68]
 Model=tat25_g15_01
@@ -2388,7 +2330,6 @@ BottomLeftHeight=1
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE69]
 Model=tat25_g16_01
@@ -2421,7 +2362,6 @@ BottomLeftHeight=1
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE70]
 Model=tat25_g18_01
@@ -2454,7 +2394,6 @@ BottomLeftHeight=0
 BottomRightHeight=1
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE71]
 Model=tat25_g19_01
@@ -2487,7 +2426,6 @@ BottomLeftHeight=0
 BottomRightHeight=1
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE72]
 Model=tat25_g20_01
@@ -2520,7 +2458,6 @@ BottomLeftHeight=0
 BottomRightHeight=1
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE73]
 Model=tat25_h01_01
@@ -2553,7 +2490,6 @@ BottomLeftHeight=0
 BottomRightHeight=2
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE74]
 Model=tat25_h02_01
@@ -2586,7 +2522,6 @@ BottomLeftHeight=0
 BottomRightHeight=2
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE75]
 Model=tat25_h03_01
@@ -2619,7 +2554,6 @@ BottomLeftHeight=0
 BottomRightHeight=2
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE76]
 Model=tat25_h05_01
@@ -2652,7 +2586,6 @@ BottomLeftHeight=1
 BottomRightHeight=1
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE77]
 Model=tat25_h06_01
@@ -2685,7 +2618,6 @@ BottomLeftHeight=1
 BottomRightHeight=1
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE78]
 Model=tat25_h07_01
@@ -2718,7 +2650,6 @@ BottomLeftHeight=1
 BottomRightHeight=1
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE79]
 Model=tat25_h09_01
@@ -2751,7 +2682,6 @@ BottomLeftHeight=1
 BottomRightHeight=1
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE80]
 Model=tat25_h10_01
@@ -2784,7 +2714,6 @@ BottomLeftHeight=1
 BottomRightHeight=1
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE81]
 Model=tat25_h11_01
@@ -2817,7 +2746,6 @@ BottomLeftHeight=1
 BottomRightHeight=1
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE82]
 Model=tat25_h13_01
@@ -2850,7 +2778,6 @@ BottomLeftHeight=1
 BottomRightHeight=-1
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE83]
 Model=tat25_h14_01
@@ -2883,7 +2810,6 @@ BottomLeftHeight=1
 BottomRightHeight=-1
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE84]
 Model=tat25_h15_01
@@ -2916,7 +2842,6 @@ BottomLeftHeight=1
 BottomRightHeight=-1
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE85]
 Model=tat25_h19_01
@@ -2949,7 +2874,6 @@ BottomLeftHeight=0
 BottomRightHeight=2
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE86]
 Model=tat25_h18_01
@@ -2982,7 +2906,6 @@ BottomLeftHeight=0
 BottomRightHeight=2
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE87]
 Model=tat25_h21_01
@@ -3015,7 +2938,6 @@ BottomLeftHeight=1
 BottomRightHeight=2
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE88]
 Model=tat25_h22_01
@@ -3048,7 +2970,6 @@ BottomLeftHeight=2
 BottomRightHeight=1
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE89]
 Model=tat25_e04_01
@@ -3081,7 +3002,6 @@ BottomLeftHeight=0
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE90]
 Model=tat25_c03_01
@@ -3114,7 +3034,6 @@ BottomLeftHeight=0
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE91]
 Model=tat25_c11_01
@@ -3147,7 +3066,6 @@ BottomLeftHeight=0
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE92]
 Model=tat25_c12_01
@@ -3180,7 +3098,6 @@ BottomLeftHeight=0
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE93]
 Model=tat25_c13_01
@@ -3213,7 +3130,6 @@ BottomLeftHeight=0
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE94]
 Model=tat25_c14_01
@@ -3246,7 +3162,6 @@ BottomLeftHeight=0
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE95]
 Model=tat25_c15_01
@@ -3279,7 +3194,6 @@ BottomLeftHeight=0
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE96]
 Model=tat25_d22_01
@@ -3312,7 +3226,6 @@ BottomLeftHeight=0
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE97]
 Model=tat25_i01_01
@@ -3345,7 +3258,6 @@ BottomLeftHeight=0
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE98]
 Model=tat25_i11_01
@@ -3378,7 +3290,6 @@ BottomLeftHeight=0
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE99]
 Model=tat25_i12_01
@@ -3411,7 +3322,6 @@ BottomLeftHeight=0
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE100]
 Model=tat25_i13_01
@@ -3444,7 +3354,6 @@ BottomLeftHeight=0
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE101]
 Model=tat25_i14_01
@@ -3477,7 +3386,6 @@ BottomLeftHeight=0
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE102]
 Model=tat25_J01_01
@@ -3510,7 +3418,6 @@ BottomLeftHeight=0
 BottomRightHeight=1
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE103]
 Model=tat25_J02_01
@@ -3543,7 +3450,6 @@ BottomLeftHeight=1
 BottomRightHeight=1
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE104]
 Model=tat25_J03_01
@@ -3576,7 +3482,6 @@ BottomLeftHeight=1
 BottomRightHeight=1
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE105]
 Model=tat25_J04_01
@@ -3609,7 +3514,6 @@ BottomLeftHeight=1
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE106]
 Model=tat25_J06_01
@@ -3642,7 +3546,6 @@ BottomLeftHeight=0
 BottomRightHeight=1
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE107]
 Model=tat25_J08_01
@@ -3675,7 +3578,6 @@ BottomLeftHeight=0
 BottomRightHeight=2
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE108]
 Model=tat25_J09_01
@@ -3708,7 +3610,6 @@ BottomLeftHeight=1
 BottomRightHeight=1
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE109]
 Model=tat25_J10_01
@@ -3741,7 +3642,6 @@ BottomLeftHeight=1
 BottomRightHeight=1
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE110]
 Model=tat25_J11_01
@@ -3774,7 +3674,6 @@ BottomLeftHeight=1
 BottomRightHeight=-1
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE111]
 Model=tat25_J11_02
@@ -3807,7 +3706,6 @@ BottomLeftHeight=1
 BottomRightHeight=-1
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE112]
 Model=tat25_J13_01
@@ -3840,7 +3738,6 @@ BottomLeftHeight=0
 BottomRightHeight=2
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE113]
 Model=tat25_J14_01
@@ -3873,7 +3770,6 @@ BottomLeftHeight=1
 BottomRightHeight=2
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE114]
 Model=tat25_J15_01
@@ -3906,7 +3802,6 @@ BottomLeftHeight=0
 BottomRightHeight=2
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE115]
 Model=tat25_J17_01
@@ -3939,7 +3834,6 @@ BottomLeftHeight=1
 BottomRightHeight=2
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE116]
 Model=tat25_J18_01
@@ -3972,7 +3866,6 @@ BottomLeftHeight=2
 BottomRightHeight=1
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE117]
 Model=tat25_J20_01
@@ -4005,7 +3898,6 @@ BottomLeftHeight=0
 BottomRightHeight=1
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE118]
 Model=tat25_J21_01
@@ -4038,7 +3930,6 @@ BottomLeftHeight=1
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE119]
 Model=tat25_J23_01
@@ -4071,7 +3962,6 @@ BottomLeftHeight=1
 BottomRightHeight=1
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE120]
 Model=tat25_J24_01
@@ -4104,7 +3994,6 @@ BottomLeftHeight=1
 BottomRightHeight=1
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE121]
 Model=tat25_J26_01
@@ -4137,7 +4026,6 @@ BottomLeftHeight=2
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE122]
 Model=tat25_J28_01
@@ -4170,7 +4058,6 @@ BottomLeftHeight=0
 BottomRightHeight=2
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE123]
 Model=tat25_J29_01
@@ -4203,7 +4090,6 @@ BottomLeftHeight=1
 BottomRightHeight=1
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE124]
 Model=tat25_J30_01
@@ -4236,7 +4122,6 @@ BottomLeftHeight=1
 BottomRightHeight=1
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE125]
 Model=tat25_J31_01
@@ -4269,7 +4154,6 @@ BottomLeftHeight=1
 BottomRightHeight=-1
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE126]
 Model=tat25_J33_01
@@ -4302,7 +4186,6 @@ BottomLeftHeight=0
 BottomRightHeight=2
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE127]
 Model=tat25_J34_01
@@ -4335,7 +4218,6 @@ BottomLeftHeight=0
 BottomRightHeight=2
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE128]
 Model=tat25_J36_01
@@ -4368,7 +4250,6 @@ BottomLeftHeight=1
 BottomRightHeight=1
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE129]
 Model=tat25_J37_01
@@ -4401,7 +4282,6 @@ BottomLeftHeight=1
 BottomRightHeight=1
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE130]
 Model=tat25_J39_01
@@ -4434,7 +4314,6 @@ BottomLeftHeight=1
 BottomRightHeight=1
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE131]
 Model=tat25_J40_01
@@ -4467,7 +4346,6 @@ BottomLeftHeight=1
 BottomRightHeight=1
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE132]
 Model=tat25_J26_02
@@ -4500,7 +4378,6 @@ BottomLeftHeight=2
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE133]
 Model=tat25_b42_01
@@ -4533,7 +4410,6 @@ BottomLeftHeight=1
 BottomRightHeight=-1
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE134]
 Model=tat25_J42_01
@@ -4566,7 +4442,6 @@ BottomLeftHeight=1
 BottomRightHeight=-1
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE135]
 Model=tat25_k01_01
@@ -4599,7 +4474,6 @@ BottomLeftHeight=0
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE136]
 Model=tat25_L01_01
@@ -4632,7 +4506,6 @@ BottomLeftHeight=0
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE137]
 Model=tat25_L02_01
@@ -4665,7 +4538,6 @@ BottomLeftHeight=0
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE138]
 Model=tat25_L03_01
@@ -4698,7 +4570,6 @@ BottomLeftHeight=0
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE139]
 Model=tat25_L04_01
@@ -4731,7 +4602,6 @@ BottomLeftHeight=0
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE140]
 Model=tat25_k02_01
@@ -4764,7 +4634,6 @@ BottomLeftHeight=0
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE141]
 Model=tat25_k03_01
@@ -4797,7 +4666,6 @@ BottomLeftHeight=0
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE142]
 Model=tat25_L01_02
@@ -4830,7 +4698,6 @@ BottomLeftHeight=0
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE143]
 Model=tat25_L02_02
@@ -4863,7 +4730,6 @@ BottomLeftHeight=0
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE144]
 Model=tat25_L03_02
@@ -4896,7 +4762,6 @@ BottomLeftHeight=0
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE145]
 Model=tat25_L04_02
@@ -4929,7 +4794,6 @@ BottomLeftHeight=0
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE146]
 Model=tat25_L08_01
@@ -4962,7 +4826,6 @@ BottomLeftHeight=0
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE147]
 Model=tat25_L09_01
@@ -4995,7 +4858,6 @@ BottomLeftHeight=0
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE148]
 Model=tat25_L10_01
@@ -5028,7 +4890,6 @@ BottomLeftHeight=0
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE149]
 Model=tat25_L11_01
@@ -5061,7 +4922,6 @@ BottomLeftHeight=0
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE150]
 Model=tat25_L13_01
@@ -5094,7 +4954,6 @@ BottomLeftHeight=0
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE151]
 Model=tat25_L16_01
@@ -5127,7 +4986,6 @@ BottomLeftHeight=1
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE152]
 Model=tat25_L17_01
@@ -5160,7 +5018,6 @@ BottomLeftHeight=0
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE153]
 Model=tat25_L18_01
@@ -5193,7 +5050,6 @@ BottomLeftHeight=1
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE154]
 Model=tat25_L19_01
@@ -5226,7 +5082,6 @@ BottomLeftHeight=1
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE155]
 Model=tat25_L21_01
@@ -5259,7 +5114,6 @@ BottomLeftHeight=0
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE156]
 Model=tat25_L22_01
@@ -5292,7 +5146,6 @@ BottomLeftHeight=0
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE157]
 Model=tat25_L23_01
@@ -5325,7 +5178,6 @@ BottomLeftHeight=0
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE158]
 Model=tat25_L25_01
@@ -5358,7 +5210,6 @@ BottomLeftHeight=0
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE159]
 Model=tat25_L27_01
@@ -5391,7 +5242,6 @@ BottomLeftHeight=0
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE160]
 Model=tat25_L28_01
@@ -5424,7 +5274,6 @@ BottomLeftHeight=0
 BottomRightHeight=1
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE161]
 Model=tat25_K11_01
@@ -5457,7 +5306,6 @@ BottomLeftHeight=0
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE162]
 Model=tat25_K12_01
@@ -5490,7 +5338,6 @@ BottomLeftHeight=0
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE163]
 Model=tat25_K13_01
@@ -5523,7 +5370,6 @@ BottomLeftHeight=0
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE164]
 Model=tat25_K14_01
@@ -5556,7 +5402,6 @@ BottomLeftHeight=0
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE165]
 Model=tat25_K15_01
@@ -5589,7 +5434,6 @@ BottomLeftHeight=0
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE166]
 Model=tat25_K16_01
@@ -5622,7 +5466,6 @@ BottomLeftHeight=0
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE167]
 Model=tat25_K17_01
@@ -5655,7 +5498,6 @@ BottomLeftHeight=0
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE168]
 Model=tat25_K18_01
@@ -5688,7 +5530,6 @@ BottomLeftHeight=0
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE169]
 Model=tat25_M01_01
@@ -5721,7 +5562,6 @@ BottomLeftHeight=0
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE170]
 Model=tat25_M01_02
@@ -5754,7 +5594,6 @@ BottomLeftHeight=0
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE171]
 Model=tat25_M01_03
@@ -5787,7 +5626,6 @@ BottomLeftHeight=0
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE172]
 Model=tat25_M02_01
@@ -5820,7 +5658,6 @@ BottomLeftHeight=0
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE173]
 Model=tat25_M02_02
@@ -5853,7 +5690,6 @@ BottomLeftHeight=0
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE174]
 Model=tat25_M02_03
@@ -5886,7 +5722,6 @@ BottomLeftHeight=0
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE175]
 Model=tat25_M03_01
@@ -5919,7 +5754,6 @@ BottomLeftHeight=0
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE176]
 Model=tat25_M03_02
@@ -5952,7 +5786,6 @@ BottomLeftHeight=0
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE177]
 Model=tat25_M03_03
@@ -5985,7 +5818,6 @@ BottomLeftHeight=0
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE178]
 Model=tat25_M04_01
@@ -6018,7 +5850,6 @@ BottomLeftHeight=0
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE179]
 Model=tat25_M04_02
@@ -6051,7 +5882,6 @@ BottomLeftHeight=0
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE180]
 Model=tat25_M04_03
@@ -6084,7 +5914,6 @@ BottomLeftHeight=0
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE181]
 Model=tat25_M06_01
@@ -6117,7 +5946,6 @@ BottomLeftHeight=0
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE182]
 Model=tat25_N01_01
@@ -6150,7 +5978,6 @@ BottomLeftHeight=0
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE183]
 Model=tat25_N01_02
@@ -6183,7 +6010,6 @@ BottomLeftHeight=0
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE184]
 Model=tat25_N02_01
@@ -6216,7 +6042,6 @@ BottomLeftHeight=0
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE185]
 Model=tat25_N02_02
@@ -6249,7 +6074,6 @@ BottomLeftHeight=0
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE186]
 Model=tat25_N03_01
@@ -6282,7 +6106,6 @@ BottomLeftHeight=0
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE187]
 Model=tat25_N03_02
@@ -6315,7 +6138,6 @@ BottomLeftHeight=0
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE188]
 Model=tat25_N04_01
@@ -6348,7 +6170,6 @@ BottomLeftHeight=0
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE189]
 Model=tat25_N04_02
@@ -6381,7 +6202,6 @@ BottomLeftHeight=0
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE190]
 Model=tat25_N06_01
@@ -6414,7 +6234,6 @@ BottomLeftHeight=0
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE191]
 Model=tat25_N07_01
@@ -6447,7 +6266,6 @@ BottomLeftHeight=0
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE192]
 Model=tat25_N08_01
@@ -6480,7 +6298,6 @@ BottomLeftHeight=0
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE193]
 Model=tat25_N09_01
@@ -6513,7 +6330,6 @@ BottomLeftHeight=0
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE194]
 Model=tat25_o01_01
@@ -6546,7 +6362,6 @@ BottomLeftHeight=0
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE195]
 Model=tat25_p01_01
@@ -6579,7 +6394,6 @@ BottomLeftHeight=0
 BottomRightHeight=1
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE196]
 Model=tat25_p02_01
@@ -6612,7 +6426,6 @@ BottomLeftHeight=1
 BottomRightHeight=1
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE197]
 Model=tat25_p03_01
@@ -6645,7 +6458,6 @@ BottomLeftHeight=1
 BottomRightHeight=1
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE198]
 Model=tat25_p04_01
@@ -6678,7 +6490,6 @@ BottomLeftHeight=1
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE199]
 Model=tat25_p06_01
@@ -6711,7 +6522,6 @@ BottomLeftHeight=0
 BottomRightHeight=1
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE200]
 Model=tat25_p08_01
@@ -6744,7 +6554,6 @@ BottomLeftHeight=0
 BottomRightHeight=2
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE201]
 Model=tat25_p09_01
@@ -6777,7 +6586,6 @@ BottomLeftHeight=1
 BottomRightHeight=1
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE202]
 Model=tat25_p10_01
@@ -6810,7 +6618,6 @@ BottomLeftHeight=1
 BottomRightHeight=1
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE203]
 Model=tat25_p11_01
@@ -6843,7 +6650,6 @@ BottomLeftHeight=1
 BottomRightHeight=-1
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE204]
 Model=tat25_p11_02
@@ -6876,7 +6682,6 @@ BottomLeftHeight=1
 BottomRightHeight=-1
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE205]
 Model=tat25_p13_01
@@ -6909,7 +6714,6 @@ BottomLeftHeight=0
 BottomRightHeight=2
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE206]
 Model=tat25_p14_01
@@ -6942,7 +6746,6 @@ BottomLeftHeight=1
 BottomRightHeight=2
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE207]
 Model=tat25_p15_01
@@ -6975,7 +6778,6 @@ BottomLeftHeight=0
 BottomRightHeight=2
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE208]
 Model=tat25_p17_01
@@ -7008,7 +6810,6 @@ BottomLeftHeight=1
 BottomRightHeight=2
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE209]
 Model=tat25_p18_01
@@ -7041,7 +6842,6 @@ BottomLeftHeight=2
 BottomRightHeight=1
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE210]
 Model=tat25_p20_01
@@ -7074,7 +6874,6 @@ BottomLeftHeight=0
 BottomRightHeight=1
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE211]
 Model=tat25_p21_01
@@ -7107,7 +6906,6 @@ BottomLeftHeight=1
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE212]
 Model=tat25_p23_01
@@ -7140,7 +6938,6 @@ BottomLeftHeight=1
 BottomRightHeight=1
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE213]
 Model=tat25_p24_01
@@ -7173,7 +6970,6 @@ BottomLeftHeight=1
 BottomRightHeight=1
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE214]
 Model=tat25_p26_01
@@ -7206,7 +7002,6 @@ BottomLeftHeight=2
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE215]
 Model=tat25_p26_02
@@ -7239,7 +7034,6 @@ BottomLeftHeight=2
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE216]
 Model=tat25_p28_01
@@ -7272,7 +7066,6 @@ BottomLeftHeight=0
 BottomRightHeight=2
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE217]
 Model=tat25_p29_01
@@ -7305,7 +7098,6 @@ BottomLeftHeight=1
 BottomRightHeight=1
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE218]
 Model=tat25_p30_01
@@ -7338,7 +7130,6 @@ BottomLeftHeight=1
 BottomRightHeight=1
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE219]
 Model=tat25_p31_01
@@ -7371,7 +7162,6 @@ BottomLeftHeight=1
 BottomRightHeight=-1
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE220]
 Model=tat25_p33_01
@@ -7404,7 +7194,6 @@ BottomLeftHeight=0
 BottomRightHeight=2
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE221]
 Model=tat25_p34_01
@@ -7437,7 +7226,6 @@ BottomLeftHeight=0
 BottomRightHeight=2
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE222]
 Model=tat25_p36_01
@@ -7470,7 +7258,6 @@ BottomLeftHeight=1
 BottomRightHeight=1
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE223]
 Model=tat25_p37_01
@@ -7503,7 +7290,6 @@ BottomLeftHeight=1
 BottomRightHeight=1
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE224]
 Model=tat25_p39_01
@@ -7536,7 +7322,6 @@ BottomLeftHeight=1
 BottomRightHeight=1
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE225]
 Model=tat25_p40_01
@@ -7569,7 +7354,6 @@ BottomLeftHeight=1
 BottomRightHeight=1
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE226]
 Model=tat25_p42_01
@@ -7602,7 +7386,6 @@ BottomLeftHeight=1
 BottomRightHeight=-1
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE227]
 Model=tat25_h21_02
@@ -7635,7 +7418,6 @@ BottomLeftHeight=1
 BottomRightHeight=2
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE228]
 Model=tat25_h21_03
@@ -7668,7 +7450,6 @@ BottomLeftHeight=1
 BottomRightHeight=2
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE229]
 Model=tat25_h22_02
@@ -7701,7 +7482,6 @@ BottomLeftHeight=2
 BottomRightHeight=1
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE230]
 Model=tat25_h22_03
@@ -7734,7 +7514,6 @@ BottomLeftHeight=2
 BottomRightHeight=1
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE231]
 Model=tat25_h07_02
@@ -7767,7 +7546,6 @@ BottomLeftHeight=1
 BottomRightHeight=1
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE232]
 Model=tat25_h24_01
@@ -7800,7 +7578,6 @@ BottomLeftHeight=0
 BottomRightHeight=1
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE233]
 Model=tat25_h24_02
@@ -7833,7 +7610,6 @@ BottomLeftHeight=0
 BottomRightHeight=1
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE234]
 Model=tat25_h25_01
@@ -7866,7 +7642,6 @@ BottomLeftHeight=1
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE235]
 Model=tat25_h25_02
@@ -7899,7 +7674,6 @@ BottomLeftHeight=1
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE236]
 Model=tat25_h27_01
@@ -7932,7 +7706,6 @@ BottomLeftHeight=0
 BottomRightHeight=1
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE237]
 Model=tat25_h28_01
@@ -7965,7 +7738,6 @@ BottomLeftHeight=1
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE238]
 Model=tat25_h11_02
@@ -7998,7 +7770,6 @@ BottomLeftHeight=1
 BottomRightHeight=1
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE239]
 Model=tat25_h30_01
@@ -8031,7 +7802,6 @@ BottomLeftHeight=1
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE240]
 Model=tat25_b16_01
@@ -8064,7 +7834,6 @@ BottomLeftHeight=1
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE241]
 Model=null
@@ -8097,7 +7866,6 @@ BottomLeftHeight=-2
 BottomRightHeight=1
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE242]
 Model=null
@@ -8130,7 +7898,6 @@ BottomLeftHeight=1
 BottomRightHeight=-2
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE243]
 Model=null
@@ -8163,7 +7930,6 @@ BottomLeftHeight=1
 BottomRightHeight=-2
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE244]
 Model=null
@@ -8196,7 +7962,6 @@ BottomLeftHeight=2
 BottomRightHeight=-1
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE245]
 Model=null
@@ -8229,7 +7994,6 @@ BottomLeftHeight=0
 BottomRightHeight=-1
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE246]
 Model=null
@@ -8262,7 +8026,6 @@ BottomLeftHeight=2
 BottomRightHeight=-1
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE247]
 Model=null
@@ -8295,7 +8058,6 @@ BottomLeftHeight=-1
 BottomRightHeight=-1
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE248]
 Model=null
@@ -8328,7 +8090,6 @@ BottomLeftHeight=-1
 BottomRightHeight=2
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE249]
 Model=null
@@ -8361,7 +8122,6 @@ BottomLeftHeight=0
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE250]
 Model=null
@@ -8394,7 +8154,6 @@ BottomLeftHeight=-1
 BottomRightHeight=-1
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE251]
 Model=null
@@ -8427,7 +8186,6 @@ BottomLeftHeight=-1
 BottomRightHeight=-1
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE252]
 Model=null
@@ -8460,7 +8218,6 @@ BottomLeftHeight=-1
 BottomRightHeight=-1
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE253]
 Model=null
@@ -8493,7 +8250,6 @@ BottomLeftHeight=-1
 BottomRightHeight=-1
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE254]
 Model=null
@@ -8526,7 +8282,6 @@ BottomLeftHeight=-1
 BottomRightHeight=-1
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE255]
 Model=null
@@ -8559,7 +8314,6 @@ BottomLeftHeight=0
 BottomRightHeight=-2
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE256]
 Model=null
@@ -8592,7 +8346,6 @@ BottomLeftHeight=-2
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE257]
 Model=null
@@ -8625,7 +8378,6 @@ BottomLeftHeight=1
 BottomRightHeight=-2
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE258]
 Model=null
@@ -8658,7 +8410,6 @@ BottomLeftHeight=-2
 BottomRightHeight=1
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE259]
 Model=null
@@ -8691,7 +8442,6 @@ BottomLeftHeight=1
 BottomRightHeight=-2
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE260]
 Model=null
@@ -8724,7 +8474,6 @@ BottomLeftHeight=1
 BottomRightHeight=-2
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE261]
 Model=tat25_f11_01
@@ -8757,7 +8506,6 @@ BottomLeftHeight=1
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE262]
 Model=tat25_f12_01
@@ -8790,7 +8538,6 @@ BottomLeftHeight=0
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE263]
 Model=tat25_f13_01
@@ -8823,7 +8570,6 @@ BottomLeftHeight=1
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE264]
 Model=tat25_f14_01
@@ -8856,7 +8602,6 @@ BottomLeftHeight=1
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE265]
 Model=tat25_f16_01
@@ -8889,7 +8634,6 @@ BottomLeftHeight=0
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE266]
 Model=tat25_f17_01
@@ -8922,7 +8666,6 @@ BottomLeftHeight=0
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE267]
 Model=tat25_f18_01
@@ -8955,7 +8698,6 @@ BottomLeftHeight=0
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE268]
 Model=tat25_f20_01
@@ -8988,7 +8730,6 @@ BottomLeftHeight=0
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE269]
 Model=tat25_f22_01
@@ -9021,7 +8762,6 @@ BottomLeftHeight=0
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE270]
 Model=tat25_f23_01
@@ -9054,7 +8794,6 @@ BottomLeftHeight=0
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE271]
 Model=tat25_N11_01
@@ -9087,7 +8826,6 @@ BottomLeftHeight=0
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE272]
 Model=tat25_N12_01
@@ -9120,7 +8858,6 @@ BottomLeftHeight=0
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE273]
 Model=tat25_N13_01
@@ -9153,7 +8890,6 @@ BottomLeftHeight=0
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE274]
 Model=tat25_N14_01
@@ -9186,7 +8922,6 @@ BottomLeftHeight=0
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE275]
 Model=tat25_q01_01
@@ -9219,7 +8954,6 @@ BottomLeftHeight=0
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE276]
 Model=tat25_r01_01
@@ -9252,7 +8986,6 @@ BottomLeftHeight=0
 BottomRightHeight=1
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE277]
 Model=tat25_r02_01
@@ -9285,7 +9018,6 @@ BottomLeftHeight=1
 BottomRightHeight=1
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE278]
 Model=tat25_r03_01
@@ -9318,7 +9050,6 @@ BottomLeftHeight=1
 BottomRightHeight=1
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE279]
 Model=tat25_r04_01
@@ -9351,7 +9082,6 @@ BottomLeftHeight=1
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE280]
 Model=tat25_r06_01
@@ -9384,7 +9114,6 @@ BottomLeftHeight=0
 BottomRightHeight=1
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE281]
 Model=tat25_r08_01
@@ -9417,7 +9146,6 @@ BottomLeftHeight=0
 BottomRightHeight=2
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE282]
 Model=tat25_r09_01
@@ -9450,7 +9178,6 @@ BottomLeftHeight=1
 BottomRightHeight=1
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE283]
 Model=tat25_r10_01
@@ -9483,7 +9210,6 @@ BottomLeftHeight=1
 BottomRightHeight=1
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE284]
 Model=tat25_r11_01
@@ -9516,7 +9242,6 @@ BottomLeftHeight=1
 BottomRightHeight=-1
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE285]
 Model=tat25_r11_02
@@ -9549,7 +9274,6 @@ BottomLeftHeight=1
 BottomRightHeight=-1
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE286]
 Model=tat25_r13_01
@@ -9582,7 +9306,6 @@ BottomLeftHeight=0
 BottomRightHeight=2
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE287]
 Model=tat25_r14_01
@@ -9615,7 +9338,6 @@ BottomLeftHeight=1
 BottomRightHeight=2
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE288]
 Model=tat25_r15_01
@@ -9648,7 +9370,6 @@ BottomLeftHeight=0
 BottomRightHeight=2
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE289]
 Model=tat25_r17_01
@@ -9681,7 +9402,6 @@ BottomLeftHeight=1
 BottomRightHeight=2
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE290]
 Model=tat25_r18_01
@@ -9714,7 +9434,6 @@ BottomLeftHeight=2
 BottomRightHeight=1
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE291]
 Model=tat25_r20_01
@@ -9747,7 +9466,6 @@ BottomLeftHeight=0
 BottomRightHeight=1
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE292]
 Model=tat25_r21_01
@@ -9780,7 +9498,6 @@ BottomLeftHeight=1
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE293]
 Model=tat25_r23_01
@@ -9813,7 +9530,6 @@ BottomLeftHeight=1
 BottomRightHeight=1
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE294]
 Model=tat25_r24_01
@@ -9846,7 +9562,6 @@ BottomLeftHeight=1
 BottomRightHeight=1
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE295]
 Model=tat25_r26_01
@@ -9879,7 +9594,6 @@ BottomLeftHeight=2
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE296]
 Model=tat25_r26_02
@@ -9912,7 +9626,6 @@ BottomLeftHeight=2
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE297]
 Model=tat25_r28_01
@@ -9945,7 +9658,6 @@ BottomLeftHeight=0
 BottomRightHeight=2
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE298]
 Model=tat25_r29_01
@@ -9978,7 +9690,6 @@ BottomLeftHeight=1
 BottomRightHeight=1
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE299]
 Model=tat25_r30_01
@@ -10011,7 +9722,6 @@ BottomLeftHeight=1
 BottomRightHeight=1
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE300]
 Model=tat25_r31_01
@@ -10044,7 +9754,6 @@ BottomLeftHeight=1
 BottomRightHeight=-1
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE301]
 Model=tat25_r33_01
@@ -10077,7 +9786,6 @@ BottomLeftHeight=0
 BottomRightHeight=2
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE302]
 Model=tat25_r34_01
@@ -10110,7 +9818,6 @@ BottomLeftHeight=0
 BottomRightHeight=2
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE303]
 Model=tat25_r36_01
@@ -10143,7 +9850,6 @@ BottomLeftHeight=1
 BottomRightHeight=1
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE304]
 Model=tat25_r37_01
@@ -10176,7 +9882,6 @@ BottomLeftHeight=1
 BottomRightHeight=1
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE305]
 Model=tat25_r39_01
@@ -10209,7 +9914,6 @@ BottomLeftHeight=1
 BottomRightHeight=1
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE306]
 Model=tat25_r40_01
@@ -10242,7 +9946,6 @@ BottomLeftHeight=1
 BottomRightHeight=1
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE307]
 Model=tat25_r42_01
@@ -10275,7 +9978,6 @@ BottomLeftHeight=1
 BottomRightHeight=-1
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE308]
 Model=tat25_N16_01
@@ -10308,7 +10010,6 @@ BottomLeftHeight=0
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE309]
 Model=tat25_N17_01
@@ -10341,7 +10042,6 @@ BottomLeftHeight=0
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE310]
 Model=tat25_N18_01
@@ -10374,7 +10074,6 @@ BottomLeftHeight=0
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE311]
 Model=tat25_N19_01
@@ -10407,7 +10106,6 @@ BottomLeftHeight=0
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE312]
 Model=tat25_s01_01
@@ -10440,7 +10138,6 @@ BottomLeftHeight=0
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE313]
 Model=tat25_s02_01
@@ -10473,7 +10170,6 @@ BottomLeftHeight=0
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE314]
 Model=tat25_s03_01
@@ -10506,7 +10202,6 @@ BottomLeftHeight=0
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE315]
 Model=tat25_t01_01
@@ -10539,7 +10234,6 @@ BottomLeftHeight=0
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE316]
 Model=tat25_t02_01
@@ -10572,7 +10266,6 @@ BottomLeftHeight=0
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE317]
 Model=tat25_t03_01
@@ -10605,7 +10298,6 @@ BottomLeftHeight=0
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE318]
 Model=tat25_t03_01
@@ -10638,7 +10330,6 @@ BottomLeftHeight=0
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE319]
 Model=tat25_s11_01
@@ -10671,7 +10362,6 @@ BottomLeftHeight=0
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE320]
 Model=tat25_s12_01
@@ -10704,7 +10394,6 @@ BottomLeftHeight=0
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE321]
 Model=tat25_s13_01
@@ -10737,7 +10426,6 @@ BottomLeftHeight=0
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE322]
 Model=tat25_s14_01
@@ -10770,7 +10458,6 @@ BottomLeftHeight=0
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE323]
 Model=tat25_s16_01
@@ -10803,7 +10490,6 @@ BottomLeftHeight=0
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE324]
 Model=tat25_s17_01
@@ -10836,7 +10522,6 @@ BottomLeftHeight=0
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE325]
 Model=tat25_s18_01
@@ -10869,7 +10554,6 @@ BottomLeftHeight=0
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE326]
 Model=tat25_s19_01
@@ -10902,7 +10586,6 @@ BottomLeftHeight=0
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE327]
 Model=tat25_t11_01
@@ -10935,7 +10618,6 @@ BottomLeftHeight=0
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE328]
 Model=tat25_t12_01
@@ -10968,7 +10650,6 @@ BottomLeftHeight=0
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE329]
 Model=tat25_t13_01
@@ -11001,7 +10682,6 @@ BottomLeftHeight=0
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE330]
 Model=tat25_t14_01
@@ -11034,7 +10714,6 @@ BottomLeftHeight=0
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE331]
 Model=tat25_t14_02
@@ -11067,7 +10746,6 @@ BottomLeftHeight=0
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
-Walkmesh=msb01
 
 [TILE332]
 Model=tat25_u01_01
