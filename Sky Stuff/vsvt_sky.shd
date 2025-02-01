@@ -6,7 +6,7 @@
 #define ENVIRONMENT_MAP 0
 #define POSITION_WORLD 1
 
-#include "inc_standard"
+#include "inc_standard_md"
 
 void main ()
 {
