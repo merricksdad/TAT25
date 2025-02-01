@@ -19,6 +19,7 @@ Count=12
 
 [TERRAIN0]
 Name=dune
+StrRef=-1
 UnlocalizedName=Dune
 
 [TERRAIN1]
