@@ -2,6 +2,7 @@
 //			COMMON
 //==============================
 			
+bool bIsToolset;
 
 			
 #ifndef GLOW_MAP
@@ -247,6 +248,8 @@ void ComputeLightingEx(inout vec4 ColorIO, vec3 vNormalThis)
 	AmbientLight = lightAreaAmbient;
 	
 	float fFogAlpha = GetFogAlpha(fFogFragCoord);	
+	
+	//if (bIsToolset) fFogAlpha *= 0.1;
 	
 	DiffuseLight = COLOR_BLACK.rgb;
 	
@@ -696,10 +699,10 @@ void ApplyBetterFog(inout vec4 colorIO)
 	//colorIO.rgb = mix(colorIO.rgb, fogColor.rgb, fFogAlpha);
 }
 
-
 void SetupSunAndMoon()
 {
 	//get time
+	//this will be 0.0 if the shader is running in the toolset with day-night cycle enabled
 	moduleTime = scriptableFloat1;
 	
 
@@ -710,6 +713,18 @@ void SetupSunAndMoon()
 	//get moon position from module
 	vPosMoon = scriptableVec2.xyz;
 	vMoonColor = scriptableVec4.xyz;
+		
+	//try to identify toolset view instead of in-game player-relative
+	//the sun and moon should never be in the same position unless they are not defined.
+	//and they are not defined if the flag day-night-cycle is turned on 
+	//But if it is set to always day or always night, at least one is defined
+	if (vPosSun.xyz == vec3(0,0,0)) {
+		if (vPosMoon.xyz == vec3(0,0,0)) {
+			vPosSun = vec3(0,0,1);
+			bIsToolset = true;			
+		}
+		
+	}
 	
 	//convert frag position to player-relative position
 	vPosFrag = (vPosWorldUV.xyz - playerPosition.xyz);	
@@ -741,7 +756,14 @@ void ApplySpecialShader()
 
 	#if FOG == 1
 		ApplyFog(FragmentColor);
+		
 		//ApplyBetterFog(FragmentColor);
+		
+		//float fFogMulti = 1;
+		//if (bIsToolset) fFogMulti = 0.5;
+		//FragmentColor.rgb = mix(FragmentColor.rgb, fogColor.rgb, GetFogAlpha(fFogFragCoord) * fFogMulti);
+		//can't do this! Apparently toolset fog is done with some kind of hidden object
+		
 	#endif
 	
 	#if GAMMA_CORRECTION == 1
