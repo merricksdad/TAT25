@@ -1,0 +1,78 @@
+if (fDistFragToPlayer < 40.0) {
+
+	//******************************************
+	// Setup Indirect Lighting Fix for Foliage
+	//******************************************
+
+	vec3 vCameraView_n = normalize(playerPosition - cameraPosition);
+	float fSunSide = dot(-vCameraView_n, normalize(vPosSun));
+	float fMoonSide = dot(-vCameraView_n, normalize(vPosMoon));
+	float fSunFacing = max(min((fSunSide/2.0)+0.5, 1.0), 0.0);
+	float fMoonFacing = max(min((fMoonSide/2.0)+0.5, 1.0), 0.0);
+	vec4 vOrigColorBlurred = texture2D(texUnit0, vTexCoords.xy, 5);
+	float fOrigAlpha = max(min(vOrigColorBlurred.a, 0.96), 0.0);
+	float fOrigLum = ColorToBrightness(vOrigColorBlurred);
+
+	float fSat = ColorToChroma(vOrigColorBlurred.rgb);
+
+	//vec3 vTempAmbient = normalize(lightAreaAmbient.xyz);	
+	//float fAmbientFactor = dot(vTempAmbient,lightAreaAmbient.xyz);
+
+	float fSunMulti, fMoonMulti, fDarken;
+
+	//******************************************
+	//                 Daylight
+	//******************************************
+
+	//darken away from light source
+	fDarken = fSunFacing / 4.0;
+	fSunMulti = - fDayLight * fOrigAlpha * (1.0-fDarken);
+
+	//two stages of brightening for foliage tips with transparency
+	//fSunMulti += fDayLight * (1.0-fOrigAlpha) ;
+	fSunMulti += fDayLight * 2.0 * (1.0-pow(fOrigAlpha,0.1));
+
+	//limit
+	fSunMulti = max(min(fSunMulti, 2.0), 0.0);
+
+	//top down brightening of the foliage alpha
+	float fSunHueAdd = (1.0-fOrigAlpha)*fOrigLum;
+	DiffuseLight.xyz += 0.25 * fSunFacing * fSunHueAdd * fDayLight * vSunColor.rgb;
+	AmbientLight.xyz += 0.25 * fSunFacing * fSunHueAdd * fDayLight * vSunColor.rgb;
+
+	//******************************************
+	//                Moonlight
+	//******************************************
+
+	//recalculate for moon
+	fDarken = fMoonFacing / 4.0;
+
+	//darken away from light source
+	fMoonMulti = - fMoonLight * fOrigAlpha * (1.0-fDarken);
+
+	//two stages of brightening for foliage tips with transparency
+	//fMoonMulti += fMoonLight * (1.0-fOrigAlpha) ;
+	fMoonMulti += fMoonLight * 2.0 * (1.0-pow(fOrigAlpha,0.33));
+
+	//limit
+	fMoonMulti = max(min(fMoonMulti, 2.0), 0.0);
+
+	//top down brightening of the foliage alpha
+	float fMoonHueAdd = (1.0-fOrigAlpha)*fOrigLum;
+	AmbientLight.xyz += 0.1 * fMoonFacing * fMoonHueAdd * fMoonLight * vMoonColor.rgb;
+	DiffuseLight.xyz += 0.1 * fMoonFacing * fMoonHueAdd * fMoonLight * vMoonColor.rgb;
+
+	//brighten high saturation colors 
+	AmbientLight.xyz *= 1.0+2.0*fSat;
+	DiffuseLight.xyz *= 1.0+2.0*fSat;
+
+
+	//******************************************
+	//                Finalize
+	//******************************************
+
+	//update total light
+	AmbientLight.xyz *= 1.0 + clamp(fSunMulti + fMoonMulti, 0.0, 1.0) * min(fDayLight+fMoonLight, 1.0);
+	DiffuseLight.xyz *= 1.0 + clamp(fSunMulti + fMoonMulti, 0.0, 1.0) * min(fDayLight+fMoonLight, 1.0);
+
+}
