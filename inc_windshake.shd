@@ -11,6 +11,9 @@ uniform float FoliageWindScaleVCoordPower;
 
 uniform int FoliageSpriteRows;
 
+uniform float FoliageMaxDrawDist;
+
+
 void TransformFoliageCoordinates()
 {
 	vec4 vLocalPosition = vec4(0.0, 0.0, 0.0, 0.0);
@@ -39,134 +42,149 @@ void TransformFoliageCoordinates()
 	
 	vLocalPosition = vPos;
 	
-	//NEW Shake Shader	
-	//modify the local position using wind inputs as noise sources
-	
-	//defaults
-	int nRows = max(FoliageSpriteRows, 1);
-	//if (nRows == 0) nRows = 1;
-	
-	float fNoiseScale = FoliageWindNoiseScale;
-	if (fNoiseScale == 0.0) fNoiseScale = 1.0;
-	
-	//get temporary world position
-	vec3 vTempPos = (m_m * vLocalPosition).xyz;
-	
-	//set base wind to global wind
-	float windStrength = abs(length(areaGlobalWind));
+	//NEW Shake Shader		
+	bool bDoWind = true;
 
-	//mod wind amplitude from parameters
-	windStrength *= FoliageWindAmplitudeMult;
-	
-	//limit wind strength from parameters
-	windStrength = min(windStrength, FoliageWindMax);
-	
-	//add in additional wind sources
-	/*
-	//apparently vertex shader does not get wind pointsource data
-	for (int i = 0; i < windPointSourcesCount; i++)	{
-		float windRad = windPointSourcesRadius[i];
-		float windDist = abs(length(windPointSourcesPosition[i] - vTempPos));
-		//if (windDist < windRad) {
-			//determine how much wind time remains
-			//float windTimeLeft = windPointSourcesTimeRemaining[i]/windPointSourcesDuration[i];
-			//if (windTimeLeft > 0.01) {
-				//get base intensity
-				float windIntensity = 1.0;//windPointSourcesIntensity[i];
-				
-				//correct for zero distance
-				//if (windDist <= 0.01) windDist = 0.01;
-				
-				//pinch out wind by square of distance
-				//windIntensity *= 1.0/pow(windDist/windRad, 2.0);
-				
-				//peak the wind intensity in the front of its duration
-				//pinch out as duration wanes
-				//windIntensity *= pow(windTimeLeft, 2.0);
-				
-				//add to total wind on this vertex
-				windStrength += 100.0 * windIntensity;
-			//}
-		//}		
-	}
-	
-	windStrength += windPointSourcesCount;
-	*/
-	
-	//wavelength changes by strength (confine to: max 2, min 0.1)
-	float windWavelength = max(min(2.0, windStrength), 0.1);
-	
-	//mod wind wavelength from parameters
-	windWavelength /= FoliageWindWavelengthMult;
+	if (bDoWind == true) {
+		//modify the local position using wind inputs as noise sources
 		
-	//calculate wind shake	
-	if (windStrength != 0.0) {
-		float fFinalWaveLength = windWavelength;
-		float fTick = worldtimerTimeOfDay/20000.0;
-		fTick *= fFinalWaveLength;
-		float fNoise1 = sin(fNoiseScale * vTempPos.z * 3.1 * fTick);
-		float fNoise2 = sin((vTempPos.x+vTempPos.z) * 1.3 * fTick);
-		float fNoise3 = sin((vTempPos.y+vTempPos.z) * 0.7 * fTick);
+		//Identify row count
+		int nRows = max(FoliageSpriteRows, 1);
 		
-		float windAmplitude = 0.005 * (fNoise1 + fNoise2 + fNoise3);
+		//identify noise scale
+		float fNoiseScale = FoliageWindNoiseScale;
+		if (fNoiseScale == 0.0) fNoiseScale = 1.0;
+		
+		//get temporary world position
+		vec3 vTempPos = (m_m * vLocalPosition).xyz;
+		
+		//get area base wind magnitude
+		float areaWindMagnitude = abs(length(areaGlobalWind));
 
-		windStrength *= windAmplitude;
-	}
-	
-	
-	//when wind is strong, favor the direction of the wind
-	float windMagnitude = abs(length(areaGlobalWind));
-	float windFavor = min(windMagnitude, FoliageWindMax)/FoliageWindMax;
-	vec3 windDir = (FoliageWindMax/windMagnitude) * areaGlobalWind;
-	
-	
-	
-	//apply wind strength
-	if (windStrength != 0.0) {
+		//set base wind strength to global wind
+		float windStrength = areaWindMagnitude;
 
-		//modify wind strength by V coordinate
-		float fWindPinch = 1.0;
-		if (FoliageWindScaleByVCoord == 1) {	
-			//fWindPinch = vVertexTexCoords.y - floor(vVertexTexCoords.y);
-			fWindPinch = vVertexTexCoords.y;
-			fWindPinch = (fWindPinch*nRows)-floor(fWindPinch*nRows);
+		//mod wind amplitude from parameters
+		windStrength *= FoliageWindAmplitudeMult;
 			
-			//check for multi-row sprite map
-			/*if (nRows > 1) {
-				//recalculate to y position of sprite, rather than whole texture 
-				fWindPinch *= nRows;
-				fWindPinch -= floor(fWindPinch);
-			}*/
-			
-			fWindPinch = 1.0-fWindPinch;
-			fWindPinch = pow(fWindPinch,FoliageWindScaleVCoordPower);
-			fWindPinch = 1.0-fWindPinch;
-			
-			windStrength *= fWindPinch;			
-			windDir *= fWindPinch*fWindPinch;
-			
+		//add in additional wind sources
+		/*
+		//apparently vertex shader does not get wind pointsource data
+		for (int i = 0; i < windPointSourcesCount; i++)	{
+			float windRad = windPointSourcesRadius[i];
+			float windDist = abs(length(windPointSourcesPosition[i] - vTempPos));
+			//if (windDist < windRad) {
+				//determine how much wind time remains
+				//float windTimeLeft = windPointSourcesTimeRemaining[i]/windPointSourcesDuration[i];
+				//if (windTimeLeft > 0.01) {
+					//get base intensity
+					float windIntensity = 1.0;//windPointSourcesIntensity[i];
+					
+					//correct for zero distance
+					//if (windDist <= 0.01) windDist = 0.01;
+					
+					//pinch out wind by square of distance
+					//windIntensity *= 1.0/pow(windDist/windRad, 2.0);
+					
+					//peak the wind intensity in the front of its duration
+					//pinch out as duration wanes
+					//windIntensity *= pow(windTimeLeft, 2.0);
+					
+					//add to total wind on this vertex
+					windStrength += 100.0 * windIntensity;
+				//}
+			//}		
 		}
 		
-		windStrength *= FoliageWindAmplitudeMult;
-		//windDir *= FoliageWindAmplitudeMult;
+		windStrength += windPointSourcesCount;
+		*/
 		
-		//apply favored wind direction
-		windFavor *= windFavor * windFavor * 0.25; //not too much
-		vec3 vTotalWind = ((1.0-windFavor) * windStrength * areaGlobalWind) + (windFavor * windDir);
+		//wavelength changes by strength (confine to: max 2, min 0.1)
+		float windWavelength = max(min(2.0, windStrength), 0.1);
+		
+		//mod wind wavelength from parameters
+		windWavelength /= FoliageWindWavelengthMult;
+			
+		//start noise calculation
+		float fTick = worldtimerTimeOfDay/1000.0;
+		vec2 vOffset = fTick * vec2(0.03, 0.05);
+		float fNoise1 = texture2D(texUnitNoise, (vTempPos.xy+vOffset)).r * 2.0 - 1.0; 
+		float fNoise2 = texture2D(texUnitNoise, (vTempPos.yz+vOffset)).r * 2.0 - 1.0; 
+		float fNoise3 = texture2D(texUnitNoise, (vTempPos.zx+vOffset)).r * 2.0 - 1.0;	
+		vec3 vNoise = 0.5 * vec3(fNoise1, fNoise2, fNoise3);
+
+		//calculate wind strength
+		if (windStrength != 0.0) {
+			//              small       cyclical       time-dependent     individual
+			windStrength *= 0.005 * sin(1.44 * windWavelength * fTick * mod(length(vTempPos.xyz), 1.0));
+		}	
+		
+		//limit wind strength from parameters
+		windStrength = min(windStrength, FoliageWindMax);
+
+		
+		//when wind is strong, favor the direction of the wind
+		float windFavor = 0.25 * min(areaWindMagnitude, FoliageWindMax)/FoliageWindMax;
+		
+		//when wind is strong, increase noise 
+		//! make sure a minimum wind is not negative or zero or toolset wind won't show
+		vNoise *= max(areaWindMagnitude-1.5, 0.1);
+
+		//modify the noise scale from material parameter
+		vNoise *= fNoiseScale;
+		
+		//calculate total wind direction
+		vec3 windDir = (FoliageWindMax/areaWindMagnitude) * (areaGlobalWind + vNoise);
+		
+
 		
 		
-		//cap wind strength
-		if (abs(vTotalWind.x) > FoliageWindMax) vTotalWind.x = sign(vTotalWind.x) * FoliageWindMax;
-		if (abs(vTotalWind.y) > FoliageWindMax) vTotalWind.y = sign(vTotalWind.y) * FoliageWindMax;
-		if (abs(vTotalWind.z) > FoliageWindMax) vTotalWind.z = sign(vTotalWind.z) * FoliageWindMax;
 		
-		//force some of the XY into downward Z
-		vTotalWind.z -= abs(0.5*length(vTotalWind.xy));
-		
-		
-		vLocalPosition.xyz += vTotalWind;
+		//apply wind strength
+		if (windStrength != 0.0) {
+
+			//modify wind strength by V coordinate
+			float fWindPinch = 1.0;
+			if (FoliageWindScaleByVCoord == 1) {	
+				//fWindPinch = vVertexTexCoords.y - floor(vVertexTexCoords.y);
+				fWindPinch = vVertexTexCoords.y;
+				fWindPinch = (fWindPinch*nRows)-floor(fWindPinch*nRows);
+				
+				//check for multi-row sprite map
+				/*if (nRows > 1) {
+					//recalculate to y position of sprite, rather than whole texture 
+					fWindPinch *= nRows;
+					fWindPinch -= floor(fWindPinch);
+				}*/
+				
+				fWindPinch = 1.0-fWindPinch;
+				fWindPinch = pow(fWindPinch,FoliageWindScaleVCoordPower);
+				fWindPinch = 1.0-fWindPinch;
+				
+				windStrength *= fWindPinch;			
+				windDir *= fWindPinch*fWindPinch;
+				
+			}
+			
+			//windStrength *= FoliageWindAmplitudeMult;
+			//windDir *= FoliageWindAmplitudeMult;
+			
+			//apply favored wind direction
+			vec3 vTotalWind = ((1.0-windFavor) * windStrength * areaGlobalWind) + (windFavor * windDir);
+			
+			
+			//cap wind strength
+			if (abs(vTotalWind.x) > FoliageWindMax) vTotalWind.x = sign(vTotalWind.x) * FoliageWindMax;
+			if (abs(vTotalWind.y) > FoliageWindMax) vTotalWind.y = sign(vTotalWind.y) * FoliageWindMax;
+			if (abs(vTotalWind.z) > FoliageWindMax) vTotalWind.z = sign(vTotalWind.z) * FoliageWindMax;
+			
+			//force some of the XY into downward Z
+			vTotalWind.z -= abs(0.5*length(vTotalWind.xy));
+			
+			
+			vLocalPosition.xyz += vTotalWind;
+		}
 	}
-	
 	
 	
 	//END Shake Shader	
@@ -224,6 +242,9 @@ void TransformFoliageCoordinates()
 void ApplyFoliageShakeShader()
 {
 	TransformFoliageCoordinates();
+	
+
+	
 
 	#if KEYHOLING == 1
 	SetupKeyholeFactors();

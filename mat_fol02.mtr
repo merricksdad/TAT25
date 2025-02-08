@@ -1,0 +1,18 @@
+##Silky Oak
+twosided 1
+customshadervs vsFoliage
+customshaderfs fsFoliage
+renderhint NormalAndSpecMapped
+
+texture0 tat25_fol02
+
+parameter float Specularity 0.2
+parameter float Roughness 0.7
+
+parameter float FoliageWindAmplitudeMult 0.5
+parameter float FoliageWindWavelengthMult 3.0
+parameter float FoliageWindMax 2.0
+parameter int FoliageWindScaleByVCoord 1
+parameter float FoliageWindScaleVCoordPower 0.5
+parameter float FoliageWindNoiseScale 1.0
+parameter int FoliageSpriteRows 1

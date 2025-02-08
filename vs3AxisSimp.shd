@@ -19,7 +19,7 @@
 #define CALC_SUN_MOON 1
 
 #ifndef USE_LOCAL_NORMAL
-#define USE_LOCAL_NORMAL 0
+	#define USE_LOCAL_NORMAL 0
 #endif
 
 #define PI 3.14159265359

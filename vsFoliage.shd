@@ -15,12 +15,17 @@
 #define FOLIAGE_SHADER 1
 #define POSITION_WORLD 1
 
+varying float fDistFragToCamera;
+varying float fDistFragToPlayer;
+
 #include "inc_standard_md"
+#include "inc_random"
 #include "inc_windshake"
 
 
-varying float fDistFragToCamera;
-varying float fDistFragToPlayer;
+
+
+
 
 void main ()
 {
@@ -29,7 +34,7 @@ void main ()
 	} else {
 		ApplyStandardShader();
 	}
-	
+
 	fDistFragToCamera = distance(vPosWorld.xyz, cameraPosition.xyz);
 	fDistFragToPlayer = distance(vPosWorld.xyz, playerPosition.xyz);	
 }

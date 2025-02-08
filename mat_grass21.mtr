@@ -15,3 +15,4 @@ parameter int FoliageWindScaleByVCoord 1
 parameter float FoliageWindScaleVCoordPower 0.5
 parameter float FoliageWindNoiseScale 0.03
 parameter int FoliageSpriteRows 1
+parameter float FoliageMaxDrawDist 30.0

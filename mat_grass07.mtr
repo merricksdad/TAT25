@@ -1,0 +1,19 @@
+##mixed shorter grasses
+twosided 1
+customshadervs vsFoliage
+customshaderfs fsFoliage
+renderhint NormalAndSpecMapped
+
+texture0 tat25_grass07
+
+parameter float Specularity 0.2
+parameter float Roughness 0.9
+
+parameter float FoliageWindAmplitudeMult 1.5
+parameter float FoliageWindWavelengthMult 1.0
+parameter float FoliageWindMax 2.0
+parameter int FoliageWindScaleByVCoord 1
+parameter float FoliageWindScaleVCoordPower 0.25
+parameter float FoliageWindNoiseScale 2.0
+parameter int FoliageSpriteRows 2
+parameter float FoliageMaxDrawDist 30.0

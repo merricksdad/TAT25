@@ -1,3 +1,4 @@
+##pale onion grass
 twosided 1
 customshadervs vsFoliage
 customshaderfs fsFoliage
@@ -8,9 +9,10 @@ texture0 tat25_grass02
 parameter float Specularity 0.7
 parameter float Roughness 0.7
 
-parameter float FoliageWindAmplitudeMult 2.0
-parameter float FoliageWindWavelengthMult 0.6
-parameter float FoliageWindMax 0.5
+parameter float FoliageWindAmplitudeMult 1.0
+parameter float FoliageWindWavelengthMult 2.0
+parameter float FoliageWindMax 1.0
 parameter int FoliageWindScaleByVCoord 1
-parameter float FoliageWindScaleVCoordPower 0.66
-parameter float FoliageWindNoiseScale 0.33
+parameter float FoliageWindScaleVCoordPower 0.5
+parameter float FoliageWindNoiseScale 1.0
+parameter int FoliageSpriteRows 1

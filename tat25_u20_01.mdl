@@ -1,10 +1,10 @@
-# Exported from NWmax 0.8 b60 at 1/29/2025 7:51:09 PM
+# Exported from NWmax 0.8 b60 at 2/2/2025 6:12:44 PM
 # mdl file
 #
 #NWmax MODEL ASCII
 # model: tat25_u20_01
-#local file: C:\gmax\Scenes\Tilesets\2025 Big Naturals Arid\2025BigNaturalsArid_1111111150.gmax
-filedependancy 2025BigNaturalsArid_1111111150.gmax
+#local file: C:\gmax\Scenes\Tilesets\2025 Big Naturals Arid\2025BigNaturalsArid_11111111174.gmax
+filedependancy 2025BigNaturalsArid_11111111174.gmax
 newmodel tat25_u20_01
 setsupermodel tat25_u20_01 NULL
 classification Tile
@@ -312,7 +312,7 @@ node trimesh rock86
   diffuse 1.0 1.0 1.0 
   specular 0.0 0.0 0.0 
   shininess 10.0
-  bitmap mat_sandstone04
+  bitmap mat_sandstone05
   verts 24
     -0.7 -0.31 0.66
     1.12 0.2 -0.59
@@ -1165,7 +1165,7 @@ node trimesh rock88
   diffuse 1.0 1.0 1.0 
   specular 0.0 0.0 0.0 
   shininess 10.0
-  bitmap mat_sandstone04
+  bitmap mat_redrock02
   verts 43
     -1.06 -1.12 -0.4
     -0.99 0.71 0.33

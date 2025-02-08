@@ -40,7 +40,6 @@ varying float fDistFragToPlayer;
 #include "inc_md_2024"
 
 uniform float FoliageMaxDrawDist;
-
 uniform mat4 m_mvp;
 
 
@@ -51,9 +50,9 @@ void main ()
 	//float fDistToCamera = distance(vPosWorld.xyz, cameraPosition.xyz);	
 
 	//do not draw foliage beyond a certain distance 
-	if (FoliageMaxDrawDist != 0.0) {
+	/*if (FoliageMaxDrawDist != 0.0) {
 		if (fDistFragToCamera > FoliageMaxDrawDist) discard;
-	}
+	}*/
 
 	//initialize
     FragmentColor = vec4(1.0);
@@ -62,11 +61,12 @@ void main ()
 	//do special discard for decals
 	float fAlpha = texture2D(texUnit0, vTexCoords.xy).a;	
 	
-	if (fAlpha < 0.75) {
-		fAlpha /= (0.75*(fDistFragToCamera/90.0)); 
-		fAlpha = min(fAlpha, 1.0);
-		if (fAlpha < 0.5) discard;
-	}
+	//if (fAlpha < 0.75) {
+		//fAlpha /= (0.75*(fDistFragToCamera/100.0)); 
+		//fAlpha = min(fAlpha, 1.0);
+		//if (fAlpha < 0.75) discard;
+	//}
+	if (fAlpha < 0.20) discard;
 	fAlpha = 1.0;
 	
 	FragmentColor.a = fAlpha;

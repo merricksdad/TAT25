@@ -8,9 +8,10 @@ texture0 tat25_branch07
 parameter float Specularity 0.2
 parameter float Roughness 0.7
 
-parameter float FoliageWindAmplitudeMult 2.0
-parameter float FoliageWindWavelengthMult 1.5
-parameter float FoliageWindMax 1.0
+parameter float FoliageWindAmplitudeMult 1.0
+parameter float FoliageWindWavelengthMult 1.0
+parameter float FoliageWindMax 0.5
 parameter int FoliageWindScaleByVCoord 1
-parameter float FoliageWindScaleVCoordPower 0.66
-parameter float FoliageWindNoiseScale 1.0
+parameter float FoliageWindScaleVCoordPower 0.5
+parameter float FoliageWindNoiseScale 5.0
+parameter int FoliageSpriteRows 1
