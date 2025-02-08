@@ -152,6 +152,8 @@ void SetupThreeAxisSpecularity(vec3 Albedo)
 			
 			fSpecularity+= GetSpecularMapValue(vec2(-sign(vMixing.x),1.0)*vTexCoordsRight, NUM_TEXTURES) * abs(vMixing.x);
 										
+			fSpecularity = clamp(fSpecularity, 0.0, 1.0);
+
 		#elif ENVIRONMENT_MAP == 1
 			// This is mainly for the sake of enabling specularity on legacy content.
 			fSpecularity = mix(fSpecularityMin, fLegacyEnvMapSpecularityMax, min(fLegacyEnvMapToPBRFactor*fLegacyEnvMapSpecularityModifier, 1.0));
@@ -187,6 +189,8 @@ void SetupThreeAxisSpecularity(vec3 Albedo)
 				fRoughness+= GetRoughnessMapValue(vec2(sign(vMixing.y),1.0)*vTexCoordsFront, NUM_TEXTURES) * abs(vMixing.y);
 			
 				fRoughness+= GetRoughnessMapValue(vec2(-sign(vMixing.x),1.0)*vTexCoordsRight, NUM_TEXTURES) * abs(vMixing.x);
+				
+				fRoughness = clamp(fRoughness, 0.0, 1.0);
 			#endif
 
 		#elif SPECULAR_MAP == 1
@@ -684,6 +688,7 @@ void SetupThreeAxisShaderInputs()
 			} else {
 				//float fLum = 0.5;
 				//get per-axis diffuse color from texture
+				//do not use .rgb here so that alpha can also be mixed correctly
 				if ( vMixing.z    >=0.0) {
 					ColorMix = GetDiffuseMapValue(vTexCoordsTop, 1);
 					MainTextureColor += (ColorMix * vMixing.z);
@@ -698,7 +703,7 @@ void SetupThreeAxisShaderInputs()
 				ColorMix = GetDiffuseMapValue(vec2(-sign(vMixing.x),1.0)*vTexCoordsRight, NUM_TEXTURES);
 				MainTextureColor += (ColorMix  * abs(vMixing.x));
 				
-
+				MainTextureColor.a = clamp(MainTextureColor.a, 0.0, 1.0);
 			
 				#if ENVIRONMENT_MAP == 1
 
@@ -811,6 +816,8 @@ void ApplyThreeAxisShader()
 						fIllum += GetIlluminationMapValueFromSpecularMap(vec2(sign(vMixing.y),1.0)*vTexCoordsFront, NUM_TEXTURES) * abs(vMixing.y);
 						
 						fIllum += GetIlluminationMapValueFromSpecularMap(vec2(-sign(vmixing.x),1.0)*vTexCoordsRight, NUM_TEXTURES) * abs(vMixing.x);
+						
+						fIllum = clamp (fIllum, 0.0, 1.0);
 
 						FragmentColor.rgb *= FragmentColor.rgb * (VertexColor.rgb + fIllum);
 						FragmentColor.a *= VertexColor.a;

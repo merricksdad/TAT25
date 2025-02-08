@@ -111,7 +111,11 @@ void main ()
 	vMixing.xy *= -1;
 								
 	//all three orientations must equal one unit or mixing can go too far
+	//This is not a full fix when alpha channel is included, so later clamps 
+	//must be applied to alpha, as well as roughness, specular, and linear self illum
 	vMixing = ToUnity(vMixing);
+	//vMixing = normalize(vMixing); //this is too bright and seams show
+	//vMixing = 0.5 * (ToUnity(vMixing) + normalize(vMixing)); // this is almost perfect, but seams are highlighted
 	
 	//the values range from +1 to -1
 	//where up, front, and left refer to up, south, and west respectively
