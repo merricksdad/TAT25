@@ -1,7 +1,7 @@
  customshadervs vs3AxisSimp
  customshaderfs fs_3axis2tex01
  renderhint NormalAndSpecMapped
- texture0 tat25_floor36
+ texture0 tat25_floor38
  texture1 tat25_floor36n
  texture6 tat25_wall36
  texture7 tat25_wall36n

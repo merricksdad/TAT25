@@ -25,7 +25,7 @@ if (fDistFragToPlayer < 40.0) {
 	//******************************************
 
 	//darken away from light source
-	fDarken = fSunFacing / 4.0;
+	fDarken = fSunFacing;
 	fSunMulti = - fDayLight * fOrigAlpha * (1.0-fDarken);
 
 	//two stages of brightening for foliage tips with transparency
@@ -37,18 +37,18 @@ if (fDistFragToPlayer < 40.0) {
 
 	//top down brightening of the foliage alpha
 	float fSunHueAdd = (1.0-fOrigAlpha)*fOrigLum;
-	DiffuseLight.xyz += 0.25 * fSunFacing * fSunHueAdd * fDayLight * vSunColor.rgb;
-	AmbientLight.xyz += 0.25 * fSunFacing * fSunHueAdd * fDayLight * vSunColor.rgb;
+	DiffuseLight.xyz += 0.25  * fSunHueAdd * fDayLight * vSunColor.rgb;
+	AmbientLight.xyz += 0.25  * fSunHueAdd * fDayLight * vSunColor.rgb;
 
 	//******************************************
 	//                Moonlight
 	//******************************************
 
 	//recalculate for moon
-	fDarken = fMoonFacing / 4.0;
+	fDarken = fMoonFacing;
 
 	//darken away from light source
-	fMoonMulti = - fMoonLight * fOrigAlpha * (1.0-fDarken);
+	//fMoonMulti = - fMoonLight * fOrigAlpha * (1.0-fDarken);
 
 	//two stages of brightening for foliage tips with transparency
 	//fMoonMulti += fMoonLight * (1.0-fOrigAlpha) ;
@@ -59,8 +59,8 @@ if (fDistFragToPlayer < 40.0) {
 
 	//top down brightening of the foliage alpha
 	float fMoonHueAdd = (1.0-fOrigAlpha)*fOrigLum;
-	AmbientLight.xyz += 0.1 * fMoonFacing * fMoonHueAdd * fMoonLight * vMoonColor.rgb;
-	DiffuseLight.xyz += 0.1 * fMoonFacing * fMoonHueAdd * fMoonLight * vMoonColor.rgb;
+	AmbientLight.xyz += 0.1  * fMoonHueAdd * fMoonLight * vMoonColor.rgb;
+	DiffuseLight.xyz += 0.1  * fMoonHueAdd * fMoonLight * vMoonColor.rgb;
 
 	//brighten high saturation colors 
 	AmbientLight.xyz *= 1.0+2.0*fSat;

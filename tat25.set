@@ -15,7 +15,7 @@ Floor=dune
 Grass=0
 
 [TERRAIN TYPES]
-Count=13
+Count=14
 
 [TERRAIN0]
 Name=dune
@@ -25,12 +25,12 @@ UnlocalizedName=Dune
 [TERRAIN1]
 Name=sscliff
 StrRef=-1
-UnlocalizedName=Sandstone Cliff
+UnlocalizedName=Sandstone (T1) Cliff
 
 [TERRAIN2]
 Name=ssspire
 StrRef=-1
-UnlocalizedName=Sandstone Spire
+UnlocalizedName=Sandstone (T2) Spire
 
 [TERRAIN3]
 Name=alluvial
@@ -40,12 +40,12 @@ UnlocalizedName=Dry Alluvial
 [TERRAIN4]
 Name=tableland
 StrRef=-1
-UnlocalizedName=Tableland
+UnlocalizedName=Tableland (T1)
 
 [TERRAIN5]
 Name=redwall
 StrRef=-1
-UnlocalizedName=Red Wall
+UnlocalizedName=Tableland (T2) Red Wall
 
 [TERRAIN6]
 Name=scrub
@@ -60,12 +60,12 @@ UnlocalizedName=Grassland
 [TERRAIN8]
 Name=badlands
 StrRef=-1
-UnlocalizedName=Badlands
+UnlocalizedName=Badlands (T1)
 
 [TERRAIN9]
 Name=badlands2
 StrRef=-1
-UnlocalizedName=High Badlands
+UnlocalizedName=Badlands (T2) High
 
 [TERRAIN10]
 Name=river
@@ -81,6 +81,11 @@ UnlocalizedName=null
 Name=greenbelt
 StrRef=-1
 UnlocalizedName=Greenbelt
+
+[TERRAIN13]
+Name=dryriver
+StrRef=-1
+UnlocalizedName=River (Dry)
 
 [CROSSER TYPES]
 Count=5
@@ -108,7 +113,7 @@ UnlocalizedName=~Stream
 [CROSSER4]
 Name=drystream
 StrRef=-1
-UnlocalizedName=~Dry Stream
+UnlocalizedName=~Stream (Dry)
 
 [PRIMARY RULES]
 Count=0
@@ -117,7 +122,7 @@ Count=0
 Count=0
 
 [TILES]
-Count=438
+Count=445
 
 [TILE0]
 Model=tat25_a01_01
@@ -12776,6 +12781,7 @@ BottomLeftHeight=0
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
+Walkmesh=msb01
 
 [TILE407]
 Model=tat25_w21_02
@@ -12808,6 +12814,7 @@ BottomLeftHeight=0
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
+Walkmesh=msb01
 
 [TILE408]
 Model=tat25_w24_01
@@ -12840,6 +12847,7 @@ BottomLeftHeight=0
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
+Walkmesh=msb01
 
 [TILE409]
 Model=tat25_w25_01
@@ -12872,6 +12880,7 @@ BottomLeftHeight=0
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
+Walkmesh=msb01
 
 [TILE410]
 Model=tat25_w25_02
@@ -12904,6 +12913,7 @@ BottomLeftHeight=0
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
+Walkmesh=msb01
 
 [TILE411]
 Model=tat25_w27_01
@@ -12936,6 +12946,7 @@ BottomLeftHeight=0
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
+Walkmesh=msb01
 
 [TILE412]
 Model=tat25_w28_01
@@ -12968,6 +12979,7 @@ BottomLeftHeight=0
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
+Walkmesh=msb01
 
 [TILE413]
 Model=tat25_w29_01
@@ -13000,6 +13012,7 @@ BottomLeftHeight=0
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
+Walkmesh=msb01
 
 [TILE414]
 Model=tat25_w31_01
@@ -13032,6 +13045,7 @@ BottomLeftHeight=0
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
+Walkmesh=msb01
 
 [TILE415]
 Model=tat25_w33_01
@@ -13064,6 +13078,7 @@ BottomLeftHeight=1
 BottomRightHeight=1
 ImageMap2D=(null)
 WalkMesh=msb01
+Walkmesh=msb01
 
 [TILE416]
 Model=tat25_w33_01
@@ -13096,6 +13111,7 @@ BottomLeftHeight=1
 BottomRightHeight=1
 ImageMap2D=(null)
 WalkMesh=msb01
+Walkmesh=msb01
 
 [TILE417]
 Model=tat25_w33_01
@@ -13128,6 +13144,7 @@ BottomLeftHeight=1
 BottomRightHeight=1
 ImageMap2D=(null)
 WalkMesh=msb01
+Walkmesh=msb01
 
 [TILE418]
 Model=tat25_w34_01
@@ -13160,6 +13177,7 @@ BottomLeftHeight=1
 BottomRightHeight=1
 ImageMap2D=(null)
 WalkMesh=msb01
+Walkmesh=msb01
 
 [TILE419]
 Model=tat25_w34_01
@@ -13192,6 +13210,7 @@ BottomLeftHeight=1
 BottomRightHeight=1
 ImageMap2D=(null)
 WalkMesh=msb01
+Walkmesh=msb01
 
 [TILE420]
 Model=tat25_w34_01
@@ -13224,6 +13243,7 @@ BottomLeftHeight=1
 BottomRightHeight=1
 ImageMap2D=(null)
 WalkMesh=msb01
+Walkmesh=msb01
 
 [TILE421]
 Model=tat25_w36_01
@@ -13256,6 +13276,7 @@ BottomLeftHeight=0
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
+Walkmesh=msb01
 
 [TILE422]
 Model=tat25_w37_01
@@ -13288,6 +13309,7 @@ BottomLeftHeight=0
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
+Walkmesh=msb01
 
 [TILE423]
 Model=tat25_w41_01
@@ -13320,6 +13342,7 @@ BottomLeftHeight=0
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
+Walkmesh=msb01
 
 [TILE424]
 Model=tat25_w42_01
@@ -13352,6 +13375,7 @@ BottomLeftHeight=0
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
+Walkmesh=msb01
 
 [TILE425]
 Model=tat25_w39_01
@@ -13384,6 +13408,7 @@ BottomLeftHeight=0
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
+Walkmesh=msb01
 
 [TILE426]
 Model=tat25_w44_01
@@ -13416,6 +13441,7 @@ BottomLeftHeight=0
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
+Walkmesh=msb01
 
 [TILE427]
 Model=tat25_w36_01
@@ -13448,6 +13474,7 @@ BottomLeftHeight=0
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
+Walkmesh=msb01
 
 [TILE428]
 Model=tat25_w41_01
@@ -13480,6 +13507,7 @@ BottomLeftHeight=0
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
+Walkmesh=msb01
 
 [TILE429]
 Model=tat25_w37_01
@@ -13512,6 +13540,7 @@ BottomLeftHeight=0
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
+Walkmesh=msb01
 
 [TILE430]
 Model=tat25_w42_01
@@ -13544,6 +13573,7 @@ BottomLeftHeight=0
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
+Walkmesh=msb01
 
 [TILE431]
 Model=tat25_q01_02
@@ -13576,6 +13606,7 @@ BottomLeftHeight=0
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
+Walkmesh=msb01
 
 [TILE432]
 Model=tat25_q01_03
@@ -13608,6 +13639,7 @@ BottomLeftHeight=0
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
+Walkmesh=msb01
 
 [TILE433]
 Model=tat25_q01_04
@@ -13640,6 +13672,7 @@ BottomLeftHeight=0
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
+Walkmesh=msb01
 
 [TILE434]
 Model=tat25_q01_05
@@ -13672,6 +13705,7 @@ BottomLeftHeight=0
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
+Walkmesh=msb01
 
 [TILE435]
 Model=tat25_q01_06
@@ -13704,6 +13738,7 @@ BottomLeftHeight=0
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
+Walkmesh=msb01
 
 [TILE436]
 Model=tat25_q01_07
@@ -13736,6 +13771,7 @@ BottomLeftHeight=0
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
+Walkmesh=msb01
 
 [TILE437]
 Model=tat25_q01_08
@@ -13768,8 +13804,232 @@ BottomLeftHeight=0
 BottomRightHeight=0
 ImageMap2D=(null)
 WalkMesh=msb01
+Walkmesh=msb01
+
+[TILE438]
+Model=tat25_o01_02
+Doors=0
+Sounds=0
+Top=
+Right=
+Bottom=
+Left=
+TopLeft=scrub
+TopRight=scrub
+BottomLeft=scrub
+BottomRight=scrub
+PathNode=A
+Orientation=-180
+VisibilityNode=A
+VisibilityOrientation=-180
+DoorVisibilityNode=
+DoorVisibilityOrientation=0
+MainLight1=0
+MainLight2=0
+SourceLight1=0
+SourceLight2=0
+AnimLoop1=0
+AnimLoop2=0
+AnimLoop3=0
+TopLeftHeight=0
+TopRightHeight=0
+BottomLeftHeight=0
+BottomRightHeight=0
+ImageMap2D=(null)
+WalkMesh=msb01
+
+[TILE439]
+Model=tat25_o01_03
+Doors=0
+Sounds=0
+Top=
+Right=
+Bottom=
+Left=
+TopLeft=scrub
+TopRight=scrub
+BottomLeft=scrub
+BottomRight=scrub
+PathNode=A
+Orientation=-180
+VisibilityNode=A
+VisibilityOrientation=-180
+DoorVisibilityNode=
+DoorVisibilityOrientation=0
+MainLight1=0
+MainLight2=0
+SourceLight1=0
+SourceLight2=0
+AnimLoop1=0
+AnimLoop2=0
+AnimLoop3=0
+TopLeftHeight=0
+TopRightHeight=0
+BottomLeftHeight=0
+BottomRightHeight=0
+ImageMap2D=(null)
+WalkMesh=msb01
+
+[TILE440]
+Model=tat25_o01_04
+Doors=0
+Sounds=0
+Top=
+Right=
+Bottom=
+Left=
+TopLeft=scrub
+TopRight=scrub
+BottomLeft=scrub
+BottomRight=scrub
+PathNode=A
+Orientation=-180
+VisibilityNode=A
+VisibilityOrientation=-180
+DoorVisibilityNode=
+DoorVisibilityOrientation=0
+MainLight1=0
+MainLight2=0
+SourceLight1=0
+SourceLight2=0
+AnimLoop1=0
+AnimLoop2=0
+AnimLoop3=0
+TopLeftHeight=0
+TopRightHeight=0
+BottomLeftHeight=0
+BottomRightHeight=0
+ImageMap2D=(null)
+WalkMesh=msb01
+
+[TILE441]
+Model=tat25_o01_05
+Doors=0
+Sounds=0
+Top=
+Right=
+Bottom=
+Left=
+TopLeft=scrub
+TopRight=scrub
+BottomLeft=scrub
+BottomRight=scrub
+PathNode=A
+Orientation=-180
+VisibilityNode=A
+VisibilityOrientation=-180
+DoorVisibilityNode=
+DoorVisibilityOrientation=0
+MainLight1=0
+MainLight2=0
+SourceLight1=0
+SourceLight2=0
+AnimLoop1=0
+AnimLoop2=0
+AnimLoop3=0
+TopLeftHeight=0
+TopRightHeight=0
+BottomLeftHeight=0
+BottomRightHeight=0
+ImageMap2D=(null)
+WalkMesh=msb01
+
+[TILE442]
+Model=tat25_o01_06
+Doors=0
+Sounds=0
+Top=
+Right=
+Bottom=
+Left=
+TopLeft=scrub
+TopRight=scrub
+BottomLeft=scrub
+BottomRight=scrub
+PathNode=A
+Orientation=-180
+VisibilityNode=A
+VisibilityOrientation=-180
+DoorVisibilityNode=
+DoorVisibilityOrientation=0
+MainLight1=0
+MainLight2=0
+SourceLight1=0
+SourceLight2=0
+AnimLoop1=0
+AnimLoop2=0
+AnimLoop3=0
+TopLeftHeight=0
+TopRightHeight=0
+BottomLeftHeight=0
+BottomRightHeight=0
+ImageMap2D=(null)
+WalkMesh=msb01
+
+[TILE443]
+Model=tat25_o01_07
+Doors=0
+Sounds=0
+Top=
+Right=
+Bottom=
+Left=
+TopLeft=scrub
+TopRight=scrub
+BottomLeft=scrub
+BottomRight=scrub
+PathNode=A
+Orientation=-180
+VisibilityNode=A
+VisibilityOrientation=-180
+DoorVisibilityNode=
+DoorVisibilityOrientation=0
+MainLight1=0
+MainLight2=0
+SourceLight1=0
+SourceLight2=0
+AnimLoop1=0
+AnimLoop2=0
+AnimLoop3=0
+TopLeftHeight=0
+TopRightHeight=0
+BottomLeftHeight=0
+BottomRightHeight=0
+ImageMap2D=(null)
+WalkMesh=msb01
+
+[TILE444]
+Model=tat25_o01_08
+Doors=0
+Sounds=0
+Top=
+Right=
+Bottom=
+Left=
+TopLeft=scrub
+TopRight=scrub
+BottomLeft=scrub
+BottomRight=scrub
+PathNode=A
+Orientation=-180
+VisibilityNode=A
+VisibilityOrientation=-180
+DoorVisibilityNode=
+DoorVisibilityOrientation=0
+MainLight1=0
+MainLight2=0
+SourceLight1=0
+SourceLight2=0
+AnimLoop1=0
+AnimLoop2=0
+AnimLoop3=0
+TopLeftHeight=0
+TopRightHeight=0
+BottomLeftHeight=0
+BottomRightHeight=0
+ImageMap2D=(null)
+WalkMesh=msb01
 
 [GROUPS]
 Count=0
 
-;comment to force endline

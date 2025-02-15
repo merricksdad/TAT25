@@ -1,10 +1,10 @@
-# Exported from NWmax 0.8 b60 at 2/7/2025 6:04:50 PM
+# Exported from NWmax 0.8 b60 at 2/14/2025 11:28:44 PM
 # mdl file
 #
 #NWmax MODEL ASCII
 # model: tat25_q01_01
-#local file: C:\gmax\Scenes\Tilesets\2025 Big Naturals Arid\2025BigNaturalsArid_111111111172.gmax
-filedependancy 2025BigNaturalsArid_111111111172.gmax
+#local file: C:\gmax\Scenes\Tilesets\2025 Big Naturals Arid\2025BigNaturalsArid_11111111111165.gmax
+filedependancy 2025BigNaturalsArid_11111111111165.gmax
 newmodel tat25_q01_01
 setsupermodel tat25_q01_01 NULL
 classification Tile

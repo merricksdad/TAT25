@@ -353,9 +353,11 @@ void ComputeLightingEx(inout vec4 ColorIO, vec3 vNormalThis)
 	//normally indirectional lighting will not know where the sun is 
 	//use this to force the sun's extra bright light to cause camera-relative shadowing
 	//instead of face-relative shadowing	
+	float fSourceMulti = 1.0;
 	#if LIGHT_FORCE_INDIRECTIONAL == 1	
 		#if FOLIAGE_SHADER == 1
 			#include "inc_plantlight"
+			fSourceMulti = 2.0;
 		#endif
 	#endif	
 	
@@ -386,20 +388,20 @@ void ComputeLightingEx(inout vec4 ColorIO, vec3 vNormalThis)
 		#if GAMMA_CORRECTION == 1
 			if(lightColor[i].a < 0.0)
 			{
-				ComputePointLightSource(lightColor[i].rgb, lightPosition[i].xyz - vPosView, -lightColor[i].a, vNormalThis, true);	
+				ComputePointLightSource(fSourceMulti*lightColor[i].rgb, lightPosition[i].xyz - vPosView, -lightColor[i].a, vNormalThis, true);	
 			}
 			else
 			{
-				ComputePointLightSource(lightColor[i].rgb, lightPosition[i].xyz - vPosView, lightColor[i].a, vNormalThis, false);	
+				ComputePointLightSource(fSourceMulti*lightColor[i].rgb, lightPosition[i].xyz - vPosView, lightColor[i].a, vNormalThis, false);	
 			}
 		#else
 			if(dot(abs(lightAmbient[i].rgb), vec3(1.0, 1.0, 1.0)) == 0.0)
 			{
-				ComputePointLightSource(lightDiffuse[i].rgb, lightPosition[i].xyz - vPosView, lightQuadraticAtten[i], vNormalThis, false);	
+				ComputePointLightSource(fSourceMulti*lightDiffuse[i].rgb, lightPosition[i].xyz - vPosView, lightQuadraticAtten[i], vNormalThis, false);	
 			}
 			else
 			{
-				ComputePointLightSource(lightAmbient[i].rgb, lightPosition[i].xyz - vPosView, lightQuadraticAtten[i], vNormalThis, true);	
+				ComputePointLightSource(fSourceMulti*lightAmbient[i].rgb, lightPosition[i].xyz - vPosView, lightQuadraticAtten[i], vNormalThis, true);	
 			}
 		#endif
 	}
