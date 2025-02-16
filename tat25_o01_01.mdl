@@ -1,10 +1,10 @@
-# Exported from NWmax 0.8 b60 at 2/15/2025 3:29:15 PM
+# Exported from NWmax 0.8 b60 at 2/15/2025 8:40:38 PM
 # mdl file
 #
 #NWmax MODEL ASCII
 # model: tat25_o01_01
-#local file: C:\gmax\Scenes\Tilesets\2025 Big Naturals Arid\2025BigNaturalsArid_11111111111180.gmax
-filedependancy 2025BigNaturalsArid_11111111111180.gmax
+#local file: C:\gmax\Scenes\Tilesets\2025 Big Naturals Arid\2025BigNaturalsArid_11111111111182.gmax
+filedependancy 2025BigNaturalsArid_11111111111182.gmax
 newmodel tat25_o01_01
 setsupermodel tat25_o01_01 NULL
 classification Tile
@@ -1348,18 +1348,6 @@ node trimesh Plane409
     -8.8 -3.0 0
     -8.4 -3.0 0
     -8.0 -3.0 0
-endnode
-node dummy Tree197
-  parent tat25_o01_01
-  position 0.0 -490.0 0.0
-  orientation 1.0 0.0 0.0 0.0
-  wirecolor 0.52549 0.0235294 0.0235294 
-endnode
-node dummy Tree200
-  parent tat25_o01_01
-  position 0.0 -490.0 0.0
-  orientation 1.0 0.0 0.0 0.0
-  wirecolor 0.890196 0.596078 0.596078 
 endnode
 node dummy Plane789
   parent tat25_o01_01
