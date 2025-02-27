@@ -1,2 +1,27 @@
-parameter float WaterRim 1.0
-parameter float WaterRimDepth 3.0
+##mixed water and waterfall automaterial
+twosided 1
+transparency 1
+sample_framebuffer 2
+
+customshadervs vs_water2
+customshaderfs fs_water2
+
+renderhint NormalAndSpecMapped
+
+texture0 tat25_water01
+
+texture6 tat25_water13
+##texture7 tat25_water03n
+texture8 tat25_water18
+##texture9 tat25_water08n
+
+parameter float vSlide 0.0 0.05
+parameter float vSlide2 0.0 0.1
+
+parameter float Specularity 0.5
+parameter float Roughness 0.66
+##parameter float Metallicness 0.66
+
+parameter float WaterRapidsThreshold 0.05
+
+

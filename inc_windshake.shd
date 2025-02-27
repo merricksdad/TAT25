@@ -42,7 +42,9 @@ void TransformFoliageCoordinates()
 	
 	vLocalPosition = vPos;
 	
+	
 	//NEW Shake Shader		
+	#if SHADER_QUALITY_MODE > 0
 	bool bDoWind = true;
 
 	if (bDoWind == true) {
@@ -186,7 +188,7 @@ void TransformFoliageCoordinates()
 		}
 	}
 	
-	
+	#endif
 	//END Shake Shader	
 	
 	

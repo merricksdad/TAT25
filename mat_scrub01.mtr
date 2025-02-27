@@ -3,12 +3,12 @@
  renderhint NormalAndSpecMapped
  texture0 tat25_floor38
  texture1 tat25_floor36n
- texture6 tat25_wall36
- texture7 tat25_wall36n
+ texture6 tat25_wall50
+ texture7 tat25_wall50n
  parameter float Specularity 0.001
  parameter float Roughness 0.99
  parameter float TopBias -0.30
- parameter float TexWidth 4.0
- parameter float TexHeight 3.0
- parameter float TexTopWidth 4.0
- parameter float TexTopHeight 4.0
+ parameter float TexWidth 11.0
+ parameter float TexHeight 11.0
+ parameter float TexTopWidth 6.0
+ parameter float TexTopHeight 6.0

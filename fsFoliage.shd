@@ -50,9 +50,9 @@ void main ()
 	//float fDistToCamera = distance(vPosWorld.xyz, cameraPosition.xyz);	
 
 	//do not draw foliage beyond a certain distance 
-	/*if (FoliageMaxDrawDist != 0.0) {
+	if (FoliageMaxDrawDist != 0.0) {
 		if (fDistFragToCamera > FoliageMaxDrawDist) discard;
-	}*/
+	}
 
 	//initialize
     FragmentColor = vec4(1.0);

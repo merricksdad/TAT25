@@ -20,8 +20,9 @@ varying float fDistFragToPlayer;
 
 #include "inc_standard_md"
 #include "inc_random"
-#include "inc_windshake"
 
+
+#include "inc_windshake"
 
 
 

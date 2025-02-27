@@ -1,0 +1,8 @@
+##rocky rubble texture
+customshadervs vslit_nm
+customshaderfs fslit_nm
+renderhint NormalAndSpecMapped
+texture0 tat25_floor53
+texture1 tat25_floor53n
+ parameter float Specularity 0.1
+ parameter float Roughness 0.99

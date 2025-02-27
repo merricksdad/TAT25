@@ -1,0 +1,662 @@
+#define SHADER_TYPE 2
+#define FORCE_ALLOW_DISCARD 1
+
+//varying float fDistFragToCamera;
+//varying float fDistFragToPlayer;
+
+highp float fRoughness;
+#define MATERIAL_ROUGHNESS_VALUE fRoughness
+
+lowp float fSpecularity;
+#define MATERIAL_SPECULARITY_VALUE fSpecularity
+
+#define MATERIAL_METALLICNESS_VALUE 0.0
+#define MATERIAL_SPECULAR_COLOR_VALUE vec3(1.0, 1.0, 1.0)
+
+#include "inc_water"
+
+uniform sampler2D texUnit15;
+
+vec3 vAreaWindDirectionDistorted;
+
+float fLocalWaveOffset = 0.0;
+
+float fMainWaveAmplitude;
+float fMainWavePeriod;
+float fMainWaveSpeed;
+float fMainWaveNoiseModifier;
+float fMainWaveNoiseFrequency;
+float fMainWaveNoiseDisplacement;
+
+float fArealVariation;
+
+float fSurfaceNdotV;
+
+float fRapids;
+
+vec3 vSurfaceNormalWorld;
+
+void SetupWind(float fFragmentDepthOffset)
+{	
+	fMainWaveAmplitude = 0.4*fAreaWindForce;
+	fMainWavePeriod = 1.5/(fAreaWindForce+1.0);
+	fMainWaveSpeed =0.6 + 0.05/(fAreaWindForce);
+	fMainWaveNoiseModifier = 0.4/(0.4 + fAreaWindForce);
+	fMainWaveNoiseFrequency =  0.1;
+	fMainWaveNoiseDisplacement =  0.25+0.5 * fAreaWindForce;
+
+	fArealVariation = texture2D(texUnitNoise, 0.003 * vPosWorld.xy).r * 2.0 - 1.0;
+	vAreaWindDirectionDistorted = vAreaWindDirection;
+	vAreaWindDirectionDistorted.xy += vec2(vAreaWindDirection.x, -vAreaWindDirection.y)* fArealVariation * 0.05;
+	
+	fArealVariation*=fArealVariation;
+	fMainWaveAmplitude*=sqr(1.0 - fArealVariation);
+	// Reduce at vertical.
+	//vSurfaceNormalWorld = mat3(m_view_inv) * vSurfaceNormal;
+	fMainWaveAmplitude*=max(sqr(vSurfaceNormalWorld.z)*101.0-100.0, 0.0);
+	
+	float fAmplitudeNoise = texture2D(texUnitNoise, fMainWavePeriod * 0.01 * vPosWorld.xy - 0.005 * fTick * fMainWaveSpeed * vAreaWindDirection.xy).r;
+
+	
+	fMainWaveAmplitude *= fAmplitudeNoise;
+	#if WATER_DYNAMIC_DEPTH == 0
+		fMainWaveAmplitude *= min(1.0, fSurfaceNdotV * fFragmentDepthOffset);
+	#endif	
+}
+
+
+float GetWavesOffset(vec3 vPos)
+{
+
+	const vec2 vRotate = vec2(-0.5735764363, 0.819152044);
+	
+	const mat2 M = mat2(vRotate, vec2(-vRotate.y, vRotate.x));
+
+	vec2 vDirection = -vAreaWindDirection.xy;
+
+	float fWave = 0.0;
+	
+	float fNoiseFrequency =0.66*0.25;
+
+	float fAmplitude = 0.005;
+	float fSpeed = 0.66*0.14;
+
+	vPos.xy += vPos.z * 0.1;
+	for (int i = 0; i < WAVE_ITERATIONS; i++)
+	{
+		fWave -=  fAmplitude* (abs((texture2D(texUnitNoise, vPos.xy * fNoiseFrequency+ vDirection.xy*fTick*fSpeed).r*2.0-1.0))) * clamp(1.0-5.0*dot(vDirection, vSurfaceNormalWorld.xy), 0.0, 1.0);
+		vDirection = M * vDirection;
+		fAmplitude *= 0.75;
+		fNoiseFrequency *= 1.7;
+
+	}
+	
+    return fWave; 
+}
+
+vec3 GetSurfaceNormal(vec3 vPos)
+{
+	vec3 vTangent = vec3(1.0, 0.0, 0.0);
+	vec3 vBitangent = vec3(0.0, 1.0, 0.0);
+	// If we are on a tilted plane, translate the normal into this plane.
+	if(abs(vSurfaceNormalWorld.z) < 0.9999)
+	{
+		// Find an orthogonal vector on plane.
+		vTangent = normalize(sign(vSurfaceNormalWorld.z) * vec3(-vSurfaceNormalWorld.y, vSurfaceNormalWorld.x, 0.0));
+		vBitangent = cross(vSurfaceNormalWorld, vTangent);
+	}	
+	
+	
+	float fOffset =0.05 ;
+
+	float w0 = GetWavesOffset(vPos);
+	float wx = GetWavesOffset(vPos + vTangent * fOffset);
+	float wy = GetWavesOffset(vPos + vBitangent * fOffset);
+
+	vec3 vNormal = cross(vTangent * fOffset + vSurfaceNormalWorld * (wx-w0), vBitangent * fOffset + vSurfaceNormalWorld * (wy-w0));
+	
+	// Fast - and ugly.
+	//w0 /= fOffset;
+	//vNormal=cross(vec3(1.0, 0.0, dFdx(w0)), vec3(0.0, 1.0, dFdy(w0)));
+
+	return normalize(vNormal);
+}
+
+vec4 GetRayIntersectCoords(vec3 vPosViewOrigin, vec3 vRay, float fDepthOffset, float fMaxDistance, int nIterations)
+{
+	vec2 vRayIntersectionCoords = vec2(-1.0);
+	
+	float fAngleFactor = mix(1.0, abs(vRay.z), 0.99);
+
+	fMaxDistance*=fAngleFactor;
+	vRay/=fAngleFactor;
+	
+	float fDistanceOffsetMax = fMaxDistance / float(nIterations);
+
+	float fDepthDeltaMin = 4096.0;
+
+	vec3 vRayThis;
+	vec3 vRayMaxProj;
+	vec2 vRayCoordsThis;
+
+	float fSampleDepth;
+	float fRayIntersectionDepth = fMaxDistance + vPosViewOrigin.z;
+
+	float fDistanceMin = 0.0;
+
+	vRayMaxProj = mat3(m_proj) * (vPosViewOrigin.xyz + fMaxDistance * vRay);
+	vec2 vRayCoordsMax = 0.5 * (vRayMaxProj.xy/vRayMaxProj.z) + 0.5;
+	vec3 vPosOriginProj = mat3(m_proj) * vPosViewOrigin;
+	vec2 vPosProjOriginCoords = 0.5 * (vPosOriginProj.xy/vPosOriginProj.z) + 0.5;
+
+	// Interpolate with (1/zR - 1/zP) / (1/zE - 1/zP) = 1/zR / (1/zE - 1/zP) - (1/zP) / (1/zE - 1/zP)
+		
+	float fInterpolationDenominatorInv = 1.0 / (1.0/(vPosViewOrigin.z + vRay.z*fMaxDistance)-1.0/vPosViewOrigin.z);
+	float fInterpolationOffset = (1.0/vPosViewOrigin.z) * fInterpolationDenominatorInv;
+		
+	float fDepthDelta = clamp(fDepthOffset, 0.0, fDistanceOffsetMax); 
+	float fDistance = 0.0;
+
+	bool bFoundIntersection = false;
+	for(int n=1; n<=nIterations; n++)
+	{
+		fDistance += clamp(fDepthDelta, -fDistanceOffsetMax, fDistanceOffsetMax);
+
+		fDistance = max(0.01, fDistance);
+		vRayThis = fDistance * vRay;
+
+		vRayCoordsThis = mix(vPosProjOriginCoords, vRayCoordsMax, (1.0/(vPosViewOrigin.z + vRayThis.z)) * fInterpolationDenominatorInv - fInterpolationOffset); 
+		
+		if(vRayCoordsThis.x>1.0 || vRayCoordsThis.x<0.0 || vRayCoordsThis.y>1.0 || vRayCoordsThis.y<0.0)
+		{
+			break;
+		}
+		
+		fSampleDepth = GetDepth(vRayCoordsThis);
+
+		fDepthDelta = fSampleDepth + (vPosViewOrigin.z + vRayThis.z);
+
+		if(abs(fDepthDelta) / (fDistance + 1.0)<= abs(fDepthDeltaMin))
+		{
+			vRayIntersectionCoords = vRayCoordsThis;
+			fDepthDeltaMin = fDepthDelta  / (fDistance + 1.0);
+			fRayIntersectionDepth = fSampleDepth;
+		}
+		
+		if(fDepthDelta < 0.0)
+		{
+			bFoundIntersection = true;
+		}
+		
+		if(bFoundIntersection)
+			fDistanceOffsetMax*=0.5;		
+	}
+
+	return vec4(vRayIntersectionCoords.x, vRayIntersectionCoords.y, -fRayIntersectionDepth, fDepthDeltaMin);
+}
+
+vec4 GetReflectionCoords(vec3 vPosViewThis, vec3 vReflect, float fDepthOffset)
+{
+	const int nIterations = 10;
+	
+	float fDepthMax = mix(mix(farClip, 0.0, 0.5 + 0.5 *  vReflect.z), 100.0, 0.1);
+	
+	float fDepthDeltaMax = fDepthMax + vPosViewThis.z;
+	
+	float fDepthDeltaRelativeLimit = 0.2;
+	
+	float fMaxDistance = clamp(abs(fDepthDeltaMax), 1.0, 30.0);
+	
+	vec4 vReflectedCoords = GetRayIntersectCoords(vPosViewThis, vReflect, fDepthOffset, fMaxDistance, nIterations);
+
+	return vec4(vReflectedCoords.x, vReflectedCoords.y, vReflectedCoords.z, clamp(abs(vReflectedCoords.w/fDepthDeltaRelativeLimit), 0.0, 1.0));
+}
+
+
+//What direction in UV coordinates will the texture slide
+//This value will be imported from the MTR file or modified by SetMaterialShaderUniformVec4
+uniform vec4 vSlide;
+uniform vec4 vSlide2;
+
+uniform float WaterRapidsThreshold;
+
+//include "inc_random"
+//include "inc_md_2024"
+
+vec2 vSlideNoise = vec2(0.0);
+vec2 vTexCoords2 = vec2(0.0);
+
+uniform int texture6Bound;
+uniform sampler2D texUnit6;	
+uniform int texture7Bound;
+uniform sampler2D texUnit7;
+uniform int texture8Bound;
+uniform sampler2D texUnit8;
+uniform int texture9Bound;
+uniform sampler2D texUnit9;
+
+
+vec4 FragmentColorB;
+
+void SetupSlideShaderInputs()
+{
+	#if LIGHTING == 1
+		//FragmentColorB.a *= materialFrontDiffuse.a;
+	#endif
+
+	#if NO_TEXTURE == 1 || ENVIRONMENT_MAP == 1
+		//AlphaDiscard(FragmentColor.a);
+	#endif
+
+	#if POSITION_VIEW == 1
+		#if VERTEX_NORMAL == 1
+			// We need to normalize due to interpolation etc.
+			//vSurfaceNormal = normalize(gl_FrontFacing ? vVertexNormal : -vVertexNormal);
+			//vFragmentNormal = vSurfaceNormal;
+		#endif
+		
+		// Used for both specular light, height and environment map.
+		#if HEIGHT_MAP == 1 || (ENVIRONMENT_MAP == 1 && FRAGMENT_NORMAL == 1) || LIGHTING == 1 || SPECULAR_LIGHT == 1
+			//SetupViewToSurfaceNormal();
+		#endif
+		
+	#endif
+
+	#if NO_TEXTURE != 1
+
+		vec4 MainTextureColor;
+
+		//mod for slider
+		float fTick = worldtimerTimeOfDay/1000.0;
+		vTexCoords = vVertexTexCoords.xy - (fTick * vSlide.xy) + vSlideNoise;
+		vTexCoords2 = vVertexTexCoords.xy - (fTick * vSlide2.xy) - vSlideNoise;
+		//end mod for slider
+		
+		// Setup tangent space basis.
+/*
+		#if NORMAL_MAP == 1
+
+			if(
+			#if NORMAL_MAP == 1
+				texture7Bound != 0 ||
+			#endif
+				false // allows adding the || operator in the above checks.
+				)
+			{
+				mat3 mTSB = SetupTSB();
+				
+				#if NORMAL_MAP == 1 && LIGHTING == 1
+					if(texture7Bound != 0)
+					{
+						vFragmentNormal.xy = texture2D(texUnit7, vTexCoords).rg * 2.0 - 1.0;
+						vFragmentNormal.z = sqrt(max(1.0 - dot(vFragmentNormal.xy, vFragmentNormal.xy),0.0));
+						vFragmentNormal.xy = transpose(mat2(m_texture)) * vFragmentNormal.xy;
+						vFragmentNormal = mTSB * vFragmentNormal;
+					}
+					
+					if(texture9Bound != 0)
+					{
+						vFragmentNormal.xy = texture2D(texUnit9, vTexCoords2).rg * 2.0 - 1.0;
+						vFragmentNormal.z = sqrt(max(1.0 - dot(vFragmentNormal.xy, vFragmentNormal.xy),0.0));
+						vFragmentNormal.xy = transpose(mat2(m_texture)) * vFragmentNormal.xy;
+						vFragmentNormal = mTSB * vFragmentNormal;
+					}
+				#endif
+			}
+		#endif
+*/		
+		MainTextureColor = texture2D(texUnit6,vTexCoords.xy);
+		MainTextureColor += texture2D(texUnit8,vTexCoords2.xy);
+		MainTextureColor *= 0.5;
+	
+		
+		//mod for slide shader
+		#if SLIDE_ALPHA == 0
+			vec2 vOrigCoords = vec2(vVertexTexCoords.xy);
+			MainTextureColor.a = texture2D(texUnit6, vOrigCoords.xy).a;
+			MainTextureColor.a += texture2D(texUnit8, vOrigCoords.xy).a;
+			MainTextureColor.a *= 0.8;
+			//if (MainTextureColor.a < 0.5) discard;
+			//MainTextureColor.a = 1.0;
+		#endif
+		//end mod for slide shader
+		
+		#if ENVIRONMENT_MAP == 1
+
+			fEnvMapLevel = 1.0-MainTextureColor.a;
+
+			#if FRAGMENT_LIGHTING == 1 && LIGHTING == 1
+				MainTextureColor.rgb = mix(MainTextureColor.rgb, vec3(0.666667, 0.666667, 0.666667), fEnvMapLevel);									
+			#endif
+
+		#endif
+				
+		MainTextureColor = ApplyColorSpace(MainTextureColor);
+		
+				
+		// Only do this for vertex lighting - otherwise we apply environment maps as specular light instead.
+		#if ENVIRONMENT_MAP == 1
+				
+			#if SPECULAR_LIGHT != 1
+			
+				vec3 vTexEnvironment;
+				// If not normal mapped, we can use the coordinates from the vertex shader instead.
+				#if FRAGMENT_NORMAL != 1
+					if(envMapCube == 1)
+					{
+						vTexEnvironment = SampleEnvironmentMapCube(vVertexTexCoordsEnvironmentCube, 0.0);
+					}
+					else
+					{
+						vTexEnvironment = SampleEnvironmentMap(vVertexTexCoordsEnvironment, 0.0);
+					}
+				#else
+					if(envMapCube == 1)
+					{
+						vTexEnvironment = SampleEnvironmentMapCube(CalculateEnvironmentTexCoordsCube(vFragmentNormal), 0.0);
+					}
+					else
+					{
+						vTexEnvironment = SampleEnvironmentMap(CalculateEnvironmentTexCoords(vFragmentNormal), 0.0);
+					}
+				#endif 
+			
+				MainTextureColor.rgb = mix(MainTextureColor.rgb, vTexEnvironment.rgb, fEnvMapLevel);
+
+			#endif
+
+			FragmentColorB.rgb *= MainTextureColor.rgb;
+		
+		#else
+
+			FragmentColorB *= MainTextureColor;
+
+			//AlphaDiscard(FragmentColorB.a);
+
+		#endif
+
+	#endif
+
+	#if LIGHTING == 1
+
+		#if (FRAGMENT_LIGHTING == 1 || NORMAL_MAP == 1) && SPECULAR_LIGHT == 1
+		
+			SetupSpecularity(FragmentColorB.rgb * materialFrontDiffuse.rgb);
+				
+		#endif
+
+	#endif
+}
+
+void main ()
+{
+	vSurfaceNormal = normalize(vVertexNormal);	
+	vSurfaceNormalWorld = mat3(m_view_inv) * vSurfaceNormal;
+	
+	vTexCoords = vVertexTexCoords.xy;
+	
+	vec4 WaterBaseColor =  texture2D(texUnit0,vec2(0.5, 0.5), 20.0 );
+	
+	//apply rapids
+	vec3 vLocalUp = vec3(0.0, 0.0, 1.0);
+	
+	float fDotUp = dot(vSurfaceNormalWorld, vLocalUp);
+	
+	
+	fRapids = acos(fDotUp);
+	fRapids *= fRapids;
+	fRapids = clamp(2.0*fRapids, 0.0, 1.0);	
+
+	//darken water by distance
+	float fDarken = length(vPosWorld.xyz - cameraPosition.xyz)/25.0;
+	fDarken = 1.0-pow(1.0-fDarken, 3.0);
+		
+	fDarken = clamp (fDarken, 0.05, WaterBaseColor.a);
+	
+	fDarken += fRapids;
+	
+	
+	WaterBaseColor =  ApplyColorSpace((1.0+fRapids) * WaterBaseColor);	
+	
+	
+	#if SPECULAR_LIGHT == 1
+
+
+		#if SHADER_QUALITY_MODE > 1 && !defined MOBILE
+			
+			FragmentColor = COLOR_BLACK;
+			// Here, we manually factor it in with reflection and subsurface lighting later.
+			fSpecularity = 1.0;
+		#else
+			
+			FragmentColor = WaterBaseColor;
+			fSpecularity = WATER_SPECULARITY;
+			
+		#endif
+						
+		#if SPECULAR_DISTRIBUTION_MODEL == 1
+			fRoughness = 0.00025 + 0.00025*-vPosView.z;
+		#else
+			fRoughness = 0.0005;
+		#endif
+		
+		//add the rapids to the roughness
+		fRoughness = clamp(fRoughness + fRapids, 0.0, 1.0);		
+		
+		vec3 vWaterSurfaceCoords = vPosWorld.xyz;
+
+		//transparent water with ripples and refraction
+		#if SHADER_QUALITY_MODE > 0
+
+			vec2 vScreenCoords = vec2(float(gl_FragCoord.x) * invScreenWidth, float(gl_FragCoord.y) * invScreenHeight);
+			
+			SetupViewToSurfaceNormal();
+		
+			#ifndef MOBILE
+				float fScreenFBDepth = GetDepth(vScreenCoords);
+				fSurfaceNdotV = dot(vSurfaceNormal, -vViewToSurface_n);
+			#else
+				float fScreenFBDepth = -vPosView.z + 1.0;
+				fSurfaceNdotV = 1.0;
+			#endif
+			
+			//correct a blackening of water curved away from view
+			fSurfaceNdotV = abs(fSurfaceNdotV);
+			
+			SetupWind(fScreenFBDepth + vPosView.z);
+
+
+			#if SHADER_QUALITY_MODE > 1
+				const float fVectorLimit = 0.01;
+				const int nDisplacementIterations = 4;
+			#else
+				const float fVectorLimit = 0.1;
+				const int nDisplacementIterations = 2;
+			#endif
+						
+			vec3 vCameraToWorld_n = normalize(vPosWorld.xyz - cameraPosition.xyz);
+			float fDisplaceFactor = 1.0/((vCameraToWorld_n.z > 0.0 ? vCameraToWorld_n.z + fVectorLimit : vCameraToWorld_n.z - fVectorLimit) );
+			vec2 vWorldOffset = vCameraToWorld_n.xy * fDisplaceFactor;
+			
+			float fMainWaveOffset = 0.0; 
+
+			int n;
+			
+			float fSegmentSize = 1.0;
+			
+			float fDistance = 0.0;
+			
+			vWaterSurfaceCoords.xy = vPosWorld.xy + vWorldOffset * fDistance;
+			
+			vec3 vPosViewThis = vec3(m_view * vec4(vec3(vPosWorld.xyz + fDisplaceFactor * vCameraToWorld_n  * fDistance), 1.0));
+
+			// We have to set up this again due our new position.
+			vViewToSurface_n = normalize(vPosViewThis);
+			
+			float fDepthOffset = max(fScreenFBDepth+vPosViewThis.z, 0.0);			
+		
+		//flat water
+		#else 
+		
+			SetupViewToSurfaceNormal();
+
+			SetupWind(vPosView.z + 1.0);
+		
+		#endif
+	
+		vFragmentNormal = GetSurfaceNormal(vWaterSurfaceCoords);
+
+		vFragmentNormal = mat3(m_view) * vFragmentNormal;
+	
+	//no specular light
+	#else
+	
+		FragmentColor = ApplyColorSpace(texture2D(texUnit0,vTexCoords.xy));
+		
+		vFragmentNormal = vSurfaceNormal;
+		
+	#endif
+	
+	ComputeLighting(FragmentColor, vFragmentNormal);
+			
+	#if SPECULAR_LIGHT == 1
+				
+		#if SHADER_QUALITY_MODE > 0 && !defined MOBILE
+
+			//float fRefractionModifier = 1.0;
+			
+			vec3 vRefraction = refract(vViewToSurface_n, vFragmentNormal, 1.0 / 1.33333);
+			// To eliminate visual aberrations caused by refraction behind geometry not on the screen, we 
+			// only use the delta compared to the surface normal. This removes the "flattening" effect of 
+			// refraction and only does the distortion.
+			vec3 vRefractSurface = refract(vViewToSurface_n, vSurfaceNormal, 1.0 / 1.33333);
+			
+			//pinch refraction 
+			//vRefractSurface *= 2.0*vViewToSurface_n;
+			
+			vRefraction-= vRefractSurface;			
+			vRefraction = vViewToSurface_n + vRefraction;
+			
+
+			float fRange = WATER_REFRACTION_MAX_RANGE;
+			int nIterations = WATER_REFRACTION_ITERATIONS;
+			if (!gl_FrontFacing) {
+				fRange = fDepthOffset;
+				nIterations = 1;
+				fDarken = 0.25*fRapids;
+			}
+
+			vec4 vRefractionCoords = GetRayIntersectCoords(vPosViewThis, vRefraction, fDepthOffset, fRange, nIterations);
+			float fRefractionModifier = clamp(1.0 + vRefractionCoords.w, 0.0, 1.0);
+						
+
+			vec3 ColorRefraction = ApplyColorSpace(texture2D(texFBColor, mix(vScreenCoords, vRefractionCoords.xy, fRefractionModifier)).rgb);
+			//ColorRefraction -= WaterBaseColor.rgb;
+			
+			// We use fDepthOffset here to better blend with whenever we fail to find a suitable refraction coordinate due to overlaps. Through numerous tests, this is the least noisy, even if sometimes giving slight "ghosting" effects and not distorting contours of objects as it should.
+			// Adding fSurfaceNdotV is based on heuristics, but it fits quite pretty well in terms of predicting the refracted depth, especially for shallows where it is mostly relevant.
+
+			float fRefractionTransparency = (WaterBaseColor.a < 1.0 ? exp2(-mix(fDepthOffset, clamp(vPosViewThis.z-vRefractionCoords.z, 0.0, fRange), fRefractionModifier) * WATER_TRANSPARENCY_FACTOR * WaterBaseColor.a / ((1.0-WaterBaseColor.a))) : 0.0);
+
+			// The opacitity of the water shadows the bottom surface this much, assuming the light arrives from top down.:
+			//ColorRefraction *= (exp2(-fRefractionDepthOffset * fNdotV * WaterBaseColor.a * WATER_TRANSPARENCY_FACTOR));
+			// Equals:
+			ColorRefraction *= pow(fRefractionTransparency, fSurfaceNdotV);
+			
+			fRefractionTransparency *= 1.0-GetFogAlpha(fFogFragCoord);
+
+			#if SHADER_QUALITY_MODE > 1
+						
+				vec3 ColorReflection;
+			
+				vec3 ColorLiquid = WaterBaseColor.rgb * SubsurfaceLight;
+
+				vec3 vReflect = reflect(vViewToSurface_n, vFragmentNormal);
+					
+				vec4 vReflectedCoords = GetReflectionCoords(vPosViewThis.xyz, vReflect, fDepthOffset);
+				
+				float fReflectionMod = clamp(1.0 - vReflectedCoords.w, 0.0, 1.0);;
+
+				if(fReflectionMod >=0.0) 
+				{
+					ColorReflection = ApplyColorSpace(texture2D(texFBColor, clamp(vReflectedCoords.xy, vec2(0.001), vec2(0.999))).rgb);
+					
+					vec3 vReflectedNormal = GetNormalVector(vReflectedCoords.xy);
+					fReflectionMod *= 1.0-GetFogAlpha(GetFog(-vReflectedCoords.z));
+					
+					ColorReflection = mix(COLOR_BLACK.rgb, ColorReflection, clamp(0.1-4.0*(dot(vReflectedNormal, vReflect)) ,0.0, 1.0));
+					ColorReflection = mix(FragmentColor.rgb, ColorReflection, fReflectionMod) ;
+				}
+				else
+				{
+					ColorReflection = FragmentColor.rgb; 
+				}
+					
+				//darken water by distance
+				fRefractionTransparency = clamp(fRefractionTransparency-fDarken, 0.0,0.9);
+
+					
+				ColorLiquid.rgb = mix(ColorLiquid.rgb, ColorRefraction,  fRefractionTransparency);
+
+				float fNdotV = dot(vFragmentNormal, -vViewToSurface_n);
+
+				float fFresnelSpecularity = GetFresnelSpecularity(WATER_SPECULARITY,fNdotV);
+
+				vec3 vTexEnv = texture2D(texUnit15, vViewToSurface_n.xy).rgb * DiffuseLight.rgb;
+
+				//force in more environment map and area diffuse
+				FragmentColor.rgb = ColorLiquid.rgb + PI*mix(ColorReflection.rgb, vTexEnv, 0.5) * fFresnelSpecularity;
+				//FragmentColor.rgb = ColorLiquid.rgb + ColorReflection.rgb * fFresnelSpecularity;
+
+			#else
+
+				//darken water by distance
+				fRefractionTransparency = clamp(fRefractionTransparency-fDarken, 0.0,0.90);
+
+				FragmentColor.rgb = mix(FragmentColor.rgb, ColorRefraction.rgb, fRefractionTransparency);
+							
+			#endif
+			FragmentColor.a = 1.0;
+		#else 
+			FragmentColor.a = clamp(FragmentColor.a*PI*fDarken, 0.0,0.9);
+
+		#endif
+
+	#endif	
+
+	float fFragLum = ColorToBrightness(FragmentColor.rgb);		
+		
+	//apply rapids over existing water texture
+	if (fRapids > 0.01) {
+		FragmentColorB = vec4(1.0);
+		SetupSlideShaderInputs();
+		FragmentColor.rgb += 2.0 * PI * fFragLum * fRapids * FragmentColorB.rgb; 		
+		FragmentColor.rgba = clamp(FragmentColor.rgba, 0.0, 1.0);
+	}
+	
+	//consider backfaces
+	if (!gl_FrontFacing) {
+		FragmentColor.rgb *=  WaterBaseColor.rgb*fFragLum;
+		FragmentColor.a *= clamp(0.8+fRapids, 0.0,1.0);
+	}
+	
+	//edge alpha	
+	float fFragmentDepthOffset = (fScreenFBDepth + vPosView.z);
+	if (fFragmentDepthOffset < 0.05) FragmentColor.a *= fFragmentDepthOffset/0.05;
+		
+	
+	#if KEYHOLING == 1
+		ApplyKeyhole(FragmentColor);
+	#endif
+	
+	FragmentColor.rgb = RevertColorSpace(FragmentColor.rgb);
+
+	#if FOG == 1
+		ApplyFog(FragmentColor);
+	#endif
+	
+	ApplyDebugModeOutput(FragmentColor);
+		
+	gl_FragColor = FragmentColor;
+	
+}

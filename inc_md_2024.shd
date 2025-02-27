@@ -345,18 +345,25 @@ void ComputeLightingEx(inout vec4 ColorIO, vec3 vNormalThis)
 	//original 
 	//ComputeDiffuseLighting(lightAreaDiffuse, lightAreaDiffuseDirection, vNormalThis, 1.0, false);
 
+	//bend the light to make sun directional light brighter
+	vNormalThis *= 1.25;
+
 	//this needs to be replaced so that sun and moon can both be properly registered separately without any swapping flicker
 	ComputeDiffuseLighting(vSunColor.rgb, normalize(vDirSun.xyz), vNormalThis, fDayLight, false);
 	ComputeDiffuseLighting(vMoonColor.rgb, normalize(vDirMoon.xyz), vNormalThis, fMoonLight, false);	
-	
+
+	//bend the light back to make non-sun directional light softer
+	vNormalThis /= 1.25;
 
 	//normally indirectional lighting will not know where the sun is 
 	//use this to force the sun's extra bright light to cause camera-relative shadowing
 	//instead of face-relative shadowing	
 	float fSourceMulti = 1.0;
 	#if LIGHT_FORCE_INDIRECTIONAL == 1	
-		#if FOLIAGE_SHADER == 1
-			#include "inc_plantlight"
+		#if FOLIAGE_SHADER == 1 
+			#if SHADER_QUALITY_MODE > 1
+				#include "inc_plantlight"
+			#endif
 			fSourceMulti = 2.0;
 		#endif
 	#endif	
@@ -369,7 +376,7 @@ void ComputeLightingEx(inout vec4 ColorIO, vec3 vNormalThis)
 	//custom force higher diffuse and contrast
 	DiffuseLight = min(DiffuseLight, fDayLight+fMoonLight);	
 	#if LIGHT_FORCE_INDIRECTIONAL == 0
-	DiffuseLight *= (length(vNormalThis*vNormalThis*vNormalThis) * fDayLight * vSunColor * vSunColor);
+	//DiffuseLight *= (length(vNormalThis*vNormalThis*vNormalThis) * fDayLight * vSunColor * vSunColor);
 	#else
 	//DiffuseLight *= (length(vNormalThis*vNormalThis*vNormalThis) * fDayLight * vSunColor * vSunColor);
 	#endif
@@ -381,6 +388,9 @@ void ComputeLightingEx(inout vec4 ColorIO, vec3 vNormalThis)
 	
 	//force minimum gray light
 	if (fDifLum<0.01) DiffuseLight += 0.01;	
+	
+	//bend light one more time to force point lights to not be as forceful
+	vNormalThis *= 0.5;
 	
 	for (int i = 0; i < numLights; i++) 
 	{			

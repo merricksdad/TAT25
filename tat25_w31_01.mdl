@@ -1,10 +1,10 @@
-# Exported from NWmax 0.8 b60 at 2/8/2025 5:06:30 PM
+# Exported from NWmax 0.8 b60 at Tuesday. 2/25/2025 12:30:09 PM
 # mdl file
 #
 #NWmax MODEL ASCII
 # model: tat25_w31_01
-#local file: C:\gmax\Scenes\Tilesets\2025 Big Naturals Arid\2025BigNaturalsArid_111111111199.gmax
-filedependancy 2025BigNaturalsArid_111111111199.gmax
+#local file: C:\gmax\Scenes\Tilesets\2025 Big Naturals Arid\2025BigNaturalsArid_99150.gmax
+filedependancy 2025BigNaturalsArid_99150.gmax
 newmodel tat25_w31_01
 setsupermodel tat25_w31_01 NULL
 classification Tile
@@ -81,42 +81,42 @@ node trimesh Water04
     22 18 19  1  33 27 28  1
     19 23 22  1  28 34 33  1
   tverts 36
-    18.0 5.0 0
-    18.2 5.0 0
-    18.4 5.0 0
-    18.6 5.0 0
-    18.8 5.0 0
-    19.0 5.0 0
-    18.0 5.2 0
-    18.2 5.2 0
-    18.4 5.2 0
-    18.6 5.2 0
-    18.8 5.2 0
-    19.0 5.2 0
-    18.0 5.4 0
-    18.2 5.4 0
-    18.4 5.4 0
-    18.6 5.4 0
-    18.8 5.4 0
-    19.0 5.4 0
-    18.0 5.6 0
-    18.2 5.6 0
-    18.4 5.6 0
-    18.6 5.6 0
-    18.8 5.6 0
-    19.0 5.6 0
-    18.0 5.8 0
-    18.2 5.8 0
-    18.4 5.8 0
-    18.6 5.8 0
-    18.8 5.8 0
-    19.0 5.8 0
-    18.0 6.0 0
-    18.2 6.0 0
-    18.4 6.0 0
-    18.6 6.0 0
-    18.8 6.0 0
-    19.0 6.0 0
+    18.0 -4.0 0
+    18.2 -4.0 0
+    18.4 -4.0 0
+    18.6 -4.0 0
+    18.8 -4.0 0
+    19.0 -4.0 0
+    18.0 -4.2 0
+    18.2 -4.2 0
+    18.4 -4.2 0
+    18.6 -4.2 0
+    18.8 -4.2 0
+    19.0 -4.2 0
+    18.0 -4.4 0
+    18.2 -4.4 0
+    18.4 -4.4 0
+    18.6 -4.4 0
+    18.8 -4.4 0
+    19.0 -4.4 0
+    18.0 -4.6 0
+    18.2 -4.6 0
+    18.4 -4.6 0
+    18.6 -4.6 0
+    18.8 -4.6 0
+    19.0 -4.6 0
+    18.0 -4.8 0
+    18.2 -4.8 0
+    18.4 -4.8 0
+    18.6 -4.8 0
+    18.8 -4.8 0
+    19.0 -4.8 0
+    18.0 -5.0 0
+    18.2 -5.0 0
+    18.4 -5.0 0
+    18.6 -5.0 0
+    18.8 -5.0 0
+    19.0 -5.0 0
 endnode
 node aabb wm_58
   parent tat25_w31_01
@@ -125,7 +125,7 @@ node aabb wm_58
   wirecolor 0.223529 0.0313726 0.533333 
   render 0
   shadow 0
-  multimaterial 21
+  multimaterial 22
     Dirt
     Obscuring
     Grass
@@ -147,6 +147,7 @@ node aabb wm_58
     Snow
     Sand
     BareBones
+    Mtl #0
   ambient 0.0 0.0 0.0 
   diffuse 0.0 0.501961 0.0 
   specular 0.0 0.0 0.0 
