@@ -31,7 +31,10 @@ uniform int RENDER_STARS;
 uniform int RENDER_MOON_PHASES;
 uniform int RENDER_SUN_LATE;
 uniform int RENDER_MOON_LATE;
-
+uniform int RENDER_MOON_GLOW;
+uniform int RENDER_SUN_GLOW;
+uniform int RENDER_SUN_NOISE;
+uniform int USE_SECOND_MOON;
 
 //setup sun and moon related uniforms from MTR
 uniform float SunRadiusHorizonMulti;
@@ -39,7 +42,11 @@ uniform float SunIntensity;
 uniform float SunRadius;
 
 uniform float MoonRadiusHorizonMulti;
+uniform float MoonIntensity;
 uniform float MoonRadius;
+
+uniform float SecondMoonIntensity;
+uniform float SecondMoonRadius;
 
 uniform int SkyLowestRender;
 
@@ -68,6 +75,8 @@ uniform float CloudCover; //0.2
 uniform float CloudAlpha; //0.07
 uniform float CloudSkyTint; //0.5
 */
+
+uniform vec4 SpaceColor;
 
 
 #include "inc_standard_md"
@@ -117,15 +126,24 @@ float fSunCloudGlow;
 float fSunHorizonMod = 0.0;
 float fSunSizeMod = 1.0;
 
+float fDayBrightness;
+
 vec3 vMoonColor;
+
 vec4 vMoonFragColor;
 vec3 vPosMoon;
-float fMoonFragAngle;
+//float fMoonFragAngle;
 float fMoonLum;
+float fMoonPhase;
+
 float fMoonGlow;
 float fMoonHorizonMod = 0.0;
 float fMoonSizeMod = 1.0;
-float fMoonPhase;
+
+vec4 vMoonFragColor2;
+vec3 vPosMoon2;
+float fMoonPhase2;
+float fMoonLum2;
 
 vec3 vSkyColor;
 float fSkyLum;
@@ -507,6 +525,7 @@ vec2 GetUVFromPos(vec3 vSky, vec3 vObj){
 	return uv;
 }
 
+
 void BuildSun(){
 	//don't try drawing the sun between certain hours
 	if ((moduleTime < 3.0) || (moduleTime > 22.0)) {
@@ -532,10 +551,26 @@ void BuildSun(){
 		//sun should be upper left corner of texture
 		vSunUV *= vec2(0.5,-0.5);
 		vSunUV += vec2(0.25,-0.25);		
+
+		//get some noise for the sun
+		vec2 vNoise;
+		if (RENDER_SUN_NOISE == 1) {
+			float fNoise1 = texture2D(texUnitNoise, vec2(0.5*tick)-(0.01*vPosSky.xz)).r;
+			float fNoise2 = texture2D(texUnitNoise, vec2(0.05*tick)+(0.001*vPosSky.yz)).r;
+			vec2 vNoise1 = vec2(cos(fNoise1), tan(fNoise2));
+			vec2 vNoise2 = vec2(tan(fNoise1), sin(fNoise2));
+			vNoise = pow(((SunRadius-fSunFragAngle)/SunRadius),0.5)*0.002* (vNoise1+vNoise2);
+		}
 		
 		//get the sun color and luminance from texture
-		vSunFragColor = texture2D(texUnit0, vSunUV.xy);
+		vSunFragColor = texture2D(texUnit0, vSunUV.xy + vNoise.xy);	
 		fSunLum = ColorToLuma(vSunFragColor.rgb);
+		
+		//dim the sun by time of daytime
+		
+		fSunLum *= max(fDayBrightness, 0.25);
+		
+		
 	}	
 }
 
@@ -543,12 +578,12 @@ void BuildSun(){
 
 void BuildMoon(){
 	//don't try drawing the moon between certain hours
-	if ((moduleTime >= 8.0) && (moduleTime <= 16.0)) {
+	if ((moduleTime >= 9.0) && (moduleTime <= 15.0)) {
 		return;
 	}
-				
+					
 	//get the angle between the moon center and the sky fragment
-	fMoonFragAngle = GetRadiansBetween(vPosSky, vPosMoon);
+	float fMoonFragAngle = GetRadiansBetween(vPosSky, vPosMoon);
 	
 	//make the glow bigger by time of day
 	//fMoonFragAngle /= fMoonSizeMod;
@@ -574,12 +609,12 @@ void BuildMoon(){
 		fMoonLum = ColorToLuma(vMoonFragColor.rgb);
 
 		//make the moon less bright in daytime
-		//but don't go dark
-		//fMoonLum *= max(1.0-timeToHemisphere,0.5);		
+		fMoonLum *= max(pow(1.0-fDayBrightness, 0.5), 0.25);
 		
 		//make the moon dimmer if near the sun
-		float fMoonSunAngleMod = pow(GetAngleBetween(vPosSun, vPosMoon)/45.0, 0.5);
-		fMoonLum *= fMoonSunAngleMod;
+		//float fMoonSunAngleMod = pow(GetAngleBetween(vPosSun, vPosMoon)/45.0, 0.5);		
+		//fMoonLum *= fMoonSunAngleMod;
+		
 	
 	}	
 	
@@ -612,6 +647,92 @@ void BuildMoon(){
 }
 
 
+
+
+void BuildMoon2(){
+	//don't try drawing the moon between certain hours
+	if ((moduleTime >= 9.0) && (moduleTime <= 15.0)) {
+		return;
+	}
+				
+	float fTwoMoonFragAngle = GetRadiansBetween(vPosSky, vPosMoon);
+	if (fTwoMoonFragAngle < 0.73*radians(MoonRadius)){
+		return;
+	}
+
+	//get the angle between the moon center and the sky fragment
+	float fMoonFragAngle = GetRadiansBetween(vPosSky, vPosMoon2);
+	
+
+	
+	//make the glow bigger by time of day
+	//fMoonFragAngle /= fMoonSizeMod;
+	
+	//build a moon from texture
+	//convert sky position to uv position 
+	vec2 vMoonBaseUV;
+	if (fMoonFragAngle < radians(SecondMoonRadius)){
+	
+		//get base UV		
+		vec2 vMoonUV = GetUVFromPos(normalize(vPosSky), normalize(vPosMoon2));
+		vMoonUV *= 90.0/(PI*SecondMoonRadius);
+		
+		//scale the base coordinates to match the larger moon
+		vMoonUV /= fMoonSizeMod;
+		vMoonBaseUV = vec2(vMoonUV.xy);
+		
+		//the moon2 should be the lower left quarter of the texture				
+		vMoonUV *= vec2(0.5,-0.5);
+		vMoonUV += vec2(-0.75,0.25);		
+		
+		//get the moon fragment color and luminance from texture	
+		vMoonFragColor2 = texture2D(texUnit0, vMoonUV.xy);
+		fMoonLum2 = ColorToLuma(vMoonFragColor2.rgb);
+
+		//make the moon less bright in daytime
+		//but don't go dark
+		fMoonLum2 *= max(pow(1.0-fDayBrightness, 0.5), 0.25);
+		
+		//make the moon dimmer if near the sun
+		//float fMoonSunAngleMod = pow(GetAngleBetween(vPosSun, vPosMoon2)/45.0, 0.5);
+		//fMoonLum2 *= fMoonSunAngleMod;
+		
+		//make the moon2 not show when behind main moon 
+		fMoonLum2 -= fMoonLum;
+	
+	}	
+	
+	//do moon crescent shape
+	
+	if (RENDER_MOON_PHASES == 1 && fMoonLum2 > 0.0) {	
+		//get the base uv we stored earlier
+		vec2 uv = (2.5*vMoonBaseUV);
+		
+		//project the coordinates around a cylinder fit to the moon sprite size
+		vec3 vCyl = vec3(uv.x,uv.y, sqrt(-(uv.x*uv.x+uv.y*uv.y-0.24)));
+
+		//get the orbit time for the little sun around this cylinder
+		fMoonPhase2 = (1.0-(moduleDay/28.0)) * 2.0 * PI;
+		vec3 vTinySun = vec3(sin(fMoonPhase2)*1000.0, 0.0, cos(fMoonPhase2)*1000.0)/100.0;
+		
+		//calculate how much shade would be cast on the cylinder
+		float fShade = dot(vCyl, normalize(vTinySun-vCyl));
+		
+		//don't let the shade go to or below zero
+		//fShade = clamp(fShade, 0.01, 1.0);
+	   
+		//modify the moon color to match the fShade
+		vMoonFragColor2.rgb *= clamp(2.35*fShade, 0.01, 1.0);
+		
+		//temp
+		//if (fMoonPhase2 > PI/2.0) vMoonFragColor2.r = 1.0;
+	}
+	
+	
+}
+
+
+
 void BuildSky(){
 	
 	/*
@@ -634,77 +755,133 @@ void BuildSky(){
 	float fMoonMix=0.0;
 
 	float fSunPinch = abs(moduleTime-12.0);
+	
+	
+	if (RENDER_SUN_GLOW == 1) {
 
-	//skyline gain sun/moon diffuse color
-	float fHorizonMix = GetAngleBetween(vec3(0.0,0.0,1.0), vPosSky.xyz);
-	fHorizonMix = min(fHorizonMix, 90.0);
-	fHorizonMix /= 90.0;
-	fHorizonMix = pow(fHorizonMix, 10.0);
-	fHorizonMix = max(fHorizonMix, 0.0);
 
-	float fSunSpread = 90.0;
-	fSunSpread *= SunIntensity;
+		//skyline gain sun/moon diffuse color
+		float fHorizonMix = GetAngleBetween(vec3(0.0,0.0,1.0), vPosSky.xyz);
+		fHorizonMix = min(fHorizonMix, 90.0);
+		fHorizonMix /= 90.0;
+		fHorizonMix = pow(fHorizonMix, 10.0);
+		fHorizonMix = clamp(fHorizonMix, 0.0, 1.0);
 
-	//calculate sun properties
-	if ((moduleTime >= 3.0) && (moduleTime <= 22.0)) {
-		//sun region gains sun diffuse color 		
-		fSunMix = GetAngleBetween(vPosSun, vPosSky.xyz);
-		fSunMix = min(fSunMix, fSunSpread);
-		fSunMix /= fSunSpread;
-		fSunMix = 1.0 - fSunMix;
-		fSunMix = pow(fSunMix, pow(1.3, fSunPinch));
-		fSunMix *= SunIntensity;
-		fSunMix = clamp(fSunMix,0.0,1.0);
-		//fSunMix *= 1.25;
+		float fSunSpread = 90.0;
+		fSunSpread *= SunIntensity;
+
+		//calculate sun properties
+		if ((moduleTime >= 3.0) && (moduleTime <= 22.0)) {
+			//sun region gains sun diffuse color 		
+			fSunMix = GetAngleBetween(vPosSun, vPosSky.xyz);
+			fSunMix = min(fSunMix, fSunSpread);
+			fSunMix /= fSunSpread;
+			fSunMix = 1.0 - fSunMix;
+			fSunMix = pow(fSunMix, pow(1.3, fSunPinch));
+			//fSunMix *= 1.25;
 		
-		//calculate sun horizon modifier
-		float fSunHorizonMix = GetAngleBetween(vec3(0.0,0.0,1.0), vPosSun.xyz);
-		fSunHorizonMix /= 90.0;
-		
-		//check for below horizon
-		if (fSunHorizonMix > 1.0) {
-			fSunHorizonMix = 1.0-10.0*(fSunHorizonMix-1.0);
-			fSunHorizonMix = max(fSunHorizonMix, 0.0);
-			fSunMix *= fSunHorizonMix;
+			//calculate sun horizon modifier
+			float fSunHorizonMix = GetAngleBetween(vec3(0.0,0.0,1.0), vPosSun.xyz);
+			fSunHorizonMix /= 90.0;
+			
+			//check for below horizon
+			if (fSunHorizonMix > 1.0) {
+				fSunHorizonMix = 1.0-10.0*(fSunHorizonMix-1.0);
+				fSunHorizonMix = max(fSunHorizonMix, 0.0);
+				fSunMix *= fSunHorizonMix;
+			}
+			
+			fSunMix *= SunIntensity;
+			fSunMix = clamp(fSunMix,0.0,1.0);
+			
+			//add sun to sky
+			if (fSunMix > 0.0) {
+				vSkyColor = mix(vSkyColor.rgb, vSunColor.rgb, fSunMix); 		
+			}
+
+			//add sun to horizon
+			//vSkyColor = mix(vSkyColor.rgb, vSunColor.rgb, fHorizonMix*fSunHorizonMix); 
 		}
-		
-		//add sun to sky
-		vSkyColor = mix(vSkyColor.rgb, vSunColor.rgb, fSunMix); 		
-
-		//add sun to horizon
-		//vSkyColor = mix(vSkyColor.rgb, vSunColor.rgb, fHorizonMix*fSunHorizonMix); 
 	}
 
 	
 	//calculate moon properties
-	if ((moduleTime < 8.0) || (moduleTime > 16.0)) {
-		//moon region gains moon diffuse color 
-		fMoonMix = GetAngleBetween(vPosMoon, vPosSky.xyz);
-		fMoonMix *= abs(moduleTime-12.0)/12.0;
-		fMoonMix = min(fMoonMix, 90.0);
-		fMoonMix /= 90.0;
-		fMoonMix = 1.0 - fMoonMix;
-		fMoonMix = pow(fMoonMix, pow(1.35, fSunPinch));
-		fMoonMix = max(fMoonMix, 0.0);
-		fMoonMix *= 0.5*(1.0-fSunMix);
-		//fMoonMix *= 3.0;
-		
-		//pinch out moon glow for moon phase
-		float fPhaseGlow = 2.0*pow((2.0*(-abs((moduleDay/28.0)-0.5)+0.5)),0.5);
-		fMoonMix *= fPhaseGlow;
-		
-		//vSkyColor += 0.5*mix(vSkyColor.rgb, vMoonColor.rgb, fMoonMix+0.5*(1.0-fSunHorizonMix));
-		vSkyColor += vMoonColor.rgb * fMoonMix; 
-		//vSkyColor = mix(vSkyColor.rgb, vMoonColor.rgb, fHorizonMix); 
-}
-
+	if (RENDER_MOON_GLOW == 1) {
+		if ((moduleTime < 8.0) || (moduleTime > 16.0)) {
+			//moon region gains moon diffuse color 
+			fMoonMix = GetAngleBetween(vPosMoon, vPosSky.xyz);
+			if (fMoonMix < 90.0) {
+				fMoonMix *= abs(moduleTime-12.0)/12.0;
+				fMoonMix = clamp(fMoonMix, 0.0, 90.0);
+				fMoonMix /= 90.0;
+				fMoonMix = 1.0 - fMoonMix;
+				fMoonMix = pow(fMoonMix, pow(1.35, fSunPinch));
+				fMoonMix = clamp(fMoonMix, 0.0, 1.0);
+				//fMoonMix *= 0.5*(1.0-fSunMix);
+				fMoonMix *= 1.0-fDayBrightness;
+				//fMoonMix *= 3.0;
+				
+				//pinch out moon glow for moon phase
+				
+				if (RENDER_MOON_PHASES == 1) {		
+					float fPhaseGlow = 2.0*pow((2.0*(-abs((moduleDay/28.0)-0.5)+0.5)),0.5);
+					fMoonMix *= fPhaseGlow;
+				}
+				
+				fMoonMix *= MoonIntensity;
+				fMoonMix = clamp(fMoonMix,0.0,1.0);
+				
+				
+				//vSkyColor += 0.5*mix(vSkyColor.rgb, vMoonColor.rgb, fMoonMix+0.5*(1.0-fSunHorizonMix));
+				if (fMoonMix > 0.0) {
+					vSkyColor += vMoonColor.rgb * fMoonMix; 
+				}
+				//vSkyColor = mix(vSkyColor.rgb, vMoonColor.rgb, fHorizonMix); 
+			}
+			
+			if (USE_SECOND_MOON == 1) {
+				//moon region gains moon diffuse color 
+				fMoonMix = GetAngleBetween(vPosMoon2, vPosSky.xyz);
+				if (fMoonMix < 90.0) {
+					fMoonMix *= abs(moduleTime-12.0)/12.0;
+					fMoonMix = clamp(fMoonMix, 0.0, 90.0);
+					fMoonMix /= 90.0;
+					fMoonMix = 1.0 - fMoonMix;
+					fMoonMix = pow(fMoonMix, pow(1.35, fSunPinch));
+					fMoonMix = clamp(fMoonMix, 0.0, 1.0);
+					//fMoonMix *= 0.5*(1.0-fSunMix);
+					fMoonMix *= 1.0-fDayBrightness;
+					//fMoonMix *= 3.0;
+					
+					//pinch out moon glow for moon phase
+					
+					if (RENDER_MOON_PHASES == 1) {		
+						float fPhaseGlow = 2.0*pow((2.0*(-abs((moduleDay/28.0)-0.5)+0.5)),0.5);
+						fMoonMix *= fPhaseGlow;
+					}
+					
+					fMoonMix *= SecondMoonIntensity;
+					fMoonMix = clamp(fMoonMix,0.0,1.0);
+					
+					
+					//vSkyColor += 0.5*mix(vSkyColor.rgb, vMoonColor.rgb, fMoonMix+0.5*(1.0-fSunHorizonMix));
+					if (fMoonMix > 0.0) {
+						vSkyColor += vMoonColor.rgb * fMoonMix; 
+					}
+					//vSkyColor = mix(vSkyColor.rgb, vMoonColor.rgb, fHorizonMix); 
+				}
+			}
+			
+			
+		}
+	}
 
 	FragmentColor.rgb = vSkyColor;  
 	fSkyLum = ColorToLuma(FragmentColor.rgb);
 	
 }
 
-
+/*
 void BuildClouds() {
 	//convert skybox world coords to infinite flat sky
 	vec2 p = 20.0*vPosSky.xy/(vPosSky.z+100.0);
@@ -837,9 +1014,9 @@ void BuildClouds() {
 	FragmentColor.rgb = ScreenBlend(FragmentColor.rgb, vCloudColor);	
 
 }
+*/
 
-
-
+/*
 void BuildGlowOnClouds(){
 	//get the angle between sun position and cloud fragment position
 	float fSunCloudAngle = GetRadiansBetween(vPosSky, vPosSun);
@@ -864,64 +1041,10 @@ void BuildGlowOnClouds(){
 		fSunCloudGlow = clamp(fSunCloudGlow,0.0, 1.0);
 	}
 }
-
-
-/*
-void BuildSunGlow(){
-	//prepare the sun glow radius
-	//radius should be out to about 90 degrees from sun position
-	//square attenuation
-	fSunGlow = SunIntensity*(1.0-pow(2.0*abs(fSunFragAngle)/PI, 0.5));
-	
-	if (fSunGlow > 0.0) {
-		fSunGlow = pow(fSunGlow, SunGlowPinch*fGlowWeatherPinch);
-
-		//sun glow glow more at the horizon
-		fSunGlow *= fSunSizeMod;		
-		
-		//hide stars with sunglow
-		fStarLum -= clamp(min(2.0*fSunGlow, fStarLum), 0.0,1.0);
-
-	} else {
-		fSunGlow = 0.0;
-	}
-	
-	//limit sun glow, so it doesn't make pinpoints through dense clouds
-	fSunGlow = clamp(fSunGlow*fSunGlow, 0.0, 0.75);
-	
-	fTotalGlow += fSunGlow;
-	fTotalGlow = clamp(fTotalGlow, 0.0, 1.0);
-}
 */
 
-/*
-void BuildMoonGlow(){
-	//prepare the moon glow radius
-	//radius should be out to about 30 degrees from moon position
-	//square attenuation
-	fMoonGlow = (1.0-pow(2.0*abs(fMoonFragAngle)/PI, 0.5));
-		
-	if (fMoonGlow > 0.0) {
-		fMoonGlow = pow(fMoonGlow, MoonGlowPinch*fGlowWeatherPinch);
 
-		//moon should glow less at the horizon
-		fMoonGlow /= fMoonSizeMod;		
 
-		//moon should not glow in the daytime
-		fMoonGlow *= 1.0 - timeToHemisphere;		
-
-	} else {
-		fMoonGlow = 0.0;
-	}
-	
-	//limit moon glow so it doesn't overglow clouds
-	fMoonGlow = clamp(fMoonGlow, 0.0, 0.5);
-
-	//add double to total glow to help with night cloud opacity
-	fTotalGlow += fMoonGlow;
-	fTotalGlow = clamp(fTotalGlow, 0.0, 1.0);
-}
-*/
 
 
 
@@ -1018,7 +1141,7 @@ void BuildStars() {
 	fStarLum = 1.0;
 	
 	//don't build stars where there is a sun or moon decal	
-	float fBlockStars = fSunLum + fMoonLum;
+	float fBlockStars = fSunLum + fMoonLum + fMoonLum2;
 	if (fBlockStars > 0.1) {
 		fStarLum = 0.0;
 		return;
@@ -1047,6 +1170,10 @@ void BuildStars() {
 	fStarLum = min(fStarLum, 1.0);
 	fStarLum = max(fStarLum - fSkyLum, 0.0);
 	
+	//dim stars by time of day 
+	fStarLum *= 1.0-fDayBrightness;
+
+	
 }
 
 
@@ -1057,6 +1184,18 @@ void FinishRender(){
 	//add stars
 	FragmentColor.rgb += vec3(fStarLum);
 	
+	if (USE_SECOND_MOON == 1) {
+		//add moon2 always behind
+		if (fMoonLum2>0.0) {	
+			if (RENDER_MOON_LATE == 1) {
+				//FragmentColor.rgb -= 1.0-pow(1.0-(fMoonLum2*vMoonFragColor2.a), 2.0);
+				FragmentColor.rgb = vMoonFragColor2.rgb * fMoonLum2 * vMoonFragColor2.a;
+			} else {
+				FragmentColor.rgb += vMoonFragColor2.rgb * fMoonLum2 * vMoonFragColor2.a;
+			}
+		}
+	}
+
 	//add moon
 	if (fMoonLum>0.0) {	
 		if (RENDER_MOON_LATE == 1) {
@@ -1065,7 +1204,7 @@ void FinishRender(){
 		} else {
 			FragmentColor.rgb += vMoonFragColor.rgb * fMoonLum * vMoonFragColor.a;
 		}
-	}
+	}	
 	
 	//add sun
 	if (fSunLum>0.0) {	
@@ -1076,6 +1215,7 @@ void FinishRender(){
 			FragmentColor.rgb += vSunFragColor.rgb * fSunLum * vSunFragColor.a;
 		}
 	}
+	
 	
 
 }
@@ -1097,6 +1237,11 @@ void main (){
 		//get time from module
 		moduleTime = scriptableFloat1;
 		timeToHemisphere = GetRangeToHorizon(8.0);
+		
+		//do this calculation just once
+		float fModHour = moduleHour - 4.0;
+		if (fModHour < 0.0) fModHour += 24.0;
+		fDayBrightness = 1.0-(abs((fModHour/24.0)-0.5)*2.0);
 
 		//SetupWeather();
 		
@@ -1111,17 +1256,13 @@ void main (){
 		vMoonColor = scriptableVec4.xyz;
 
 		BuildMoon();
+
+		//get moon2 position from module
+		vPosMoon2 = scriptableVec5.xyz;
+
+		BuildMoon2();
 				
 		if (RENDER_STARS == 1) BuildStars();
-
-		
-		/*
-		if (RENDER_GLOW == 1) {
-			BuildSunGlow();
-			BuildMoonGlow();
-		}
-		*/
-		
 
 		if (RENDER_CLOUDS == 1) {
 			//BuildGlowOnClouds();
