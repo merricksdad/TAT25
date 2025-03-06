@@ -1,0 +1,19 @@
+##mixed water and waterfall automaterial
+twosided 1
+transparency 1
+sample_framebuffer 2
+
+customshadervs vs_water2
+customshaderfs fs_water2
+
+renderhint NormalAndSpecMapped
+
+texture0 tat25_water01
+
+texture6 tat25_water13
+texture8 tat25_water18
+
+parameter float vSlide 0.0 0.05
+parameter float vSlide2 0.0 0.1
+
+

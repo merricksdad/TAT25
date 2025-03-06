@@ -20,21 +20,19 @@ varying float fDistFragToPlayer;
 
 #include "inc_standard_md"
 #include "inc_random"
-
-
 #include "inc_windshake"
-
-
-
-
+#include "inc_light_md"
 
 void main ()
 {
+	SetupSunAndMoon();
+
 	if (FoliageWindMax > 0.0) {
 		ApplyFoliageShakeShader();
 	} else {
 		ApplyStandardShader();
 	}
+
 
 	fDistFragToCamera = distance(vPosWorld.xyz, cameraPosition.xyz);
 	fDistFragToPlayer = distance(vPosWorld.xyz, playerPosition.xyz);	

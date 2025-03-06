@@ -6,10 +6,9 @@
 
 #define SHADER_TYPE 1
 
-//varying float fDistFragToCamera;
-//varying float fDistFragToPlayer;
-
-#include "inc_water"
+#include "inc_scriptable"
+#include "inc_water_md"
+#include "inc_light_md"
 
 void SetupVertexWind()
 {	
@@ -35,10 +34,7 @@ void SetupVertexWind()
 
 void main ()
 {
+	SetupSunAndMoon();
 	ApplyStandardShader();
-	SetupVertexWind();
-	
-	//fDistFragToCamera = distance(vPosWorld.xyz, cameraPosition.xyz);
-	//fDistFragToPlayer = distance(vPosWorld.xyz, playerPosition.xyz);	
-
+	SetupVertexWind();	
 }

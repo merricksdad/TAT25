@@ -1,35 +1,15 @@
 #include "nw_inc_dynlight"
 
-//custom function to get module time
-float GetModuleTime()
-{
-    float fModuleHour = 0.0;
-
-    //get module minutes
-    fModuleHour += IntToFloat(GetTimeMinute());
-    fModuleHour += IntToFloat(GetTimeSecond())/60.0f;
-    fModuleHour += IntToFloat(GetTimeMillisecond())/60000.0f;
-
-    //divide by module minutes per hour to get fraction of hour
-    float fModuleMinutesPerHour = HoursToSeconds(1) / 60.0f;
-    fModuleHour /= fModuleMinutesPerHour;
-
-    //add module hour
-    fModuleHour += IntToFloat(GetTimeHour());
-    return fModuleHour;
-}
-
 void main()
 {
-
     //initialize sun/moon cycle for v.35+
     ExecuteScript("nw_dynlight");
 
-    float fModuleHour = GetModuleTime();
+    float fModuleHour = GetDuskDawnModifiedModuleTime();
 
     //setup time vars
-    float fFadeTime = 0.0;
-    int bRecursive = 1;
+    float fFadeTime = 0.0; //turned off to stop wiggling
+    int bRecursive = 0;  //turned off to stop wiggling
     if(bRecursive)
     {
         if(!GetLocalInt(GetModule(), NW_DYNAMIC_LIGHT_RUNNING))
@@ -46,11 +26,8 @@ void main()
 
     //get light positions based on time of day
     vector vSun = GetSunlightDirectionFromTime(fGlobalLatitude, 0.0);
-    vector vMoon = GetMoonlightDirectionFromTime(fGlobalLatitude, 0.0, 2);
-    vector vMoon2 = GetMoonlightDirectionFromTime2(fGlobalLatitude, 0.0, 5, 1.5);
-
-    //vSun.z *= 0.5;
-    //vMoon.z *= 0.5;
+    vector vMoon = GetMoonlightDirectionFromTime(fGlobalLatitude, 0.0, 2.0);
+    vector vMoon2 = GetMoonlightDirectionFromTime2(fGlobalLatitude, 0.0, 6.0, 1.25);
 
     //send all PCs the details
     object oPC = GetFirstPC();

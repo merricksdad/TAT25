@@ -7,8 +7,10 @@
 #define POSITION_WORLD 1
 
 #include "inc_standard_md"
+#include "inc_light_md"
 
 void main ()
 {
+	SetupSunAndMoon();
 	ApplyStandardShader();	
 }

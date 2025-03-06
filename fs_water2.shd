@@ -1,8 +1,6 @@
 #define SHADER_TYPE 2
 #define FORCE_ALLOW_DISCARD 1
-
-//varying float fDistFragToCamera;
-//varying float fDistFragToPlayer;
+#define SKIP_NORMAL 1
 
 highp float fRoughness;
 #define MATERIAL_ROUGHNESS_VALUE fRoughness
@@ -13,7 +11,9 @@ lowp float fSpecularity;
 #define MATERIAL_METALLICNESS_VALUE 0.0
 #define MATERIAL_SPECULAR_COLOR_VALUE vec3(1.0, 1.0, 1.0)
 
-#include "inc_water"
+#include "inc_options_md"
+#include "inc_water_md"
+#include "inc_light_md"
 
 uniform sampler2D texUnit15;
 
@@ -113,13 +113,13 @@ vec3 GetSurfaceNormal(vec3 vPos)
 	float wx = GetWavesOffset(vPos + vTangent * fOffset);
 	float wy = GetWavesOffset(vPos + vBitangent * fOffset);
 
-	vec3 vNormal = cross(vTangent * fOffset + vSurfaceNormalWorld * (wx-w0), vBitangent * fOffset + vSurfaceNormalWorld * (wy-w0));
+	vec3 vNorm = cross(vTangent * fOffset + vSurfaceNormalWorld * (wx-w0), vBitangent * fOffset + vSurfaceNormalWorld * (wy-w0));
 	
 	// Fast - and ugly.
 	//w0 /= fOffset;
-	//vNormal=cross(vec3(1.0, 0.0, dFdx(w0)), vec3(0.0, 1.0, dFdy(w0)));
+	//vNorm=cross(vec3(1.0, 0.0, dFdx(w0)), vec3(0.0, 1.0, dFdy(w0)));
 
-	return normalize(vNormal);
+	return normalize(vNorm);
 }
 
 vec4 GetRayIntersectCoords(vec3 vPosViewOrigin, vec3 vRay, float fDepthOffset, float fMaxDistance, int nIterations)
@@ -220,9 +220,6 @@ uniform vec4 vSlide2;
 
 uniform float WaterRapidsThreshold;
 
-//include "inc_random"
-//include "inc_md_2024"
-
 vec2 vSlideNoise = vec2(0.0);
 vec2 vTexCoords2 = vec2(0.0);
 
@@ -273,38 +270,41 @@ void SetupSlideShaderInputs()
 		//end mod for slider
 		
 		// Setup tangent space basis.
-/*
-		#if NORMAL_MAP == 1
+		
+		#if SKIP_NORMAL == 0
 
-			if(
 			#if NORMAL_MAP == 1
-				texture7Bound != 0 ||
-			#endif
-				false // allows adding the || operator in the above checks.
-				)
-			{
-				mat3 mTSB = SetupTSB();
-				
-				#if NORMAL_MAP == 1 && LIGHTING == 1
-					if(texture7Bound != 0)
-					{
-						vFragmentNormal.xy = texture2D(texUnit7, vTexCoords).rg * 2.0 - 1.0;
-						vFragmentNormal.z = sqrt(max(1.0 - dot(vFragmentNormal.xy, vFragmentNormal.xy),0.0));
-						vFragmentNormal.xy = transpose(mat2(m_texture)) * vFragmentNormal.xy;
-						vFragmentNormal = mTSB * vFragmentNormal;
-					}
-					
-					if(texture9Bound != 0)
-					{
-						vFragmentNormal.xy = texture2D(texUnit9, vTexCoords2).rg * 2.0 - 1.0;
-						vFragmentNormal.z = sqrt(max(1.0 - dot(vFragmentNormal.xy, vFragmentNormal.xy),0.0));
-						vFragmentNormal.xy = transpose(mat2(m_texture)) * vFragmentNormal.xy;
-						vFragmentNormal = mTSB * vFragmentNormal;
-					}
+
+				if(
+				#if NORMAL_MAP == 1
+					texture7Bound != 0 ||
 				#endif
-			}
+					false // allows adding the || operator in the above checks.
+					)
+				{
+					mat3 mTSB = SetupTSB();
+					
+					#if NORMAL_MAP == 1 && LIGHTING == 1
+						if(texture7Bound != 0)
+						{
+							vFragmentNormal.xy = texture2D(texUnit7, vTexCoords).rg * 2.0 - 1.0;
+							vFragmentNormal.z = sqrt(max(1.0 - dot(vFragmentNormal.xy, vFragmentNormal.xy),0.0));
+							vFragmentNormal.xy = transpose(mat2(m_texture)) * vFragmentNormal.xy;
+							vFragmentNormal = mTSB * vFragmentNormal;
+						}
+						
+						if(texture9Bound != 0)
+						{
+							vFragmentNormal.xy = texture2D(texUnit9, vTexCoords2).rg * 2.0 - 1.0;
+							vFragmentNormal.z = sqrt(max(1.0 - dot(vFragmentNormal.xy, vFragmentNormal.xy),0.0));
+							vFragmentNormal.xy = transpose(mat2(m_texture)) * vFragmentNormal.xy;
+							vFragmentNormal = mTSB * vFragmentNormal;
+						}
+					#endif
+				}
+			#endif
 		#endif
-*/		
+		
 		MainTextureColor = texture2D(texUnit6,vTexCoords.xy);
 		MainTextureColor += texture2D(texUnit8,vTexCoords2.xy);
 		MainTextureColor *= 0.5;
@@ -388,8 +388,13 @@ void SetupSlideShaderInputs()
 	#endif
 }
 
+
+
+
 void main ()
 {
+	SetupSunAndMoon();
+
 	vSurfaceNormal = normalize(vVertexNormal);	
 	vSurfaceNormalWorld = mat3(m_view_inv) * vSurfaceNormal;
 	
@@ -408,8 +413,8 @@ void main ()
 	fRapids = clamp(2.0*fRapids, 0.0, 1.0);	
 
 	//darken water by distance
-	float fDarken = length(vPosWorld.xyz - cameraPosition.xyz)/25.0;
-	fDarken = 1.0-pow(1.0-fDarken, 3.0);
+	float fDarken = length(vPosWorld.xyz - cameraPosition.xyz)/33.0;
+	fDarken = 1.0-(pow(1.0-fDarken, 2.1));
 		
 	fDarken = clamp (fDarken, 0.05, WaterBaseColor.a);
 	
@@ -422,16 +427,13 @@ void main ()
 	#if SPECULAR_LIGHT == 1
 
 
-		#if SHADER_QUALITY_MODE > 1 && !defined MOBILE
-			
+		#if SHADER_QUALITY_MODE > 1 && !defined MOBILE			
 			FragmentColor = COLOR_BLACK;
-			// Here, we manually factor it in with reflection and subsurface lighting later.
-			fSpecularity = 1.0;
-		#else
-			
+			//envmap removed to allow better refraction without fixed envmap appearance
+			fSpecularity = 0.0;
+		#else			
 			FragmentColor = WaterBaseColor;
-			fSpecularity = WATER_SPECULARITY;
-			
+			fSpecularity = WATER_SPECULARITY;			
 		#endif
 						
 		#if SPECULAR_DISTRIBUTION_MODEL == 1
@@ -439,6 +441,7 @@ void main ()
 		#else
 			fRoughness = 0.0005;
 		#endif
+		
 		
 		//add the rapids to the roughness
 		fRoughness = clamp(fRoughness + fRapids, 0.0, 1.0);		
@@ -517,7 +520,16 @@ void main ()
 		
 	#endif
 	
-	ComputeLighting(FragmentColor, vFragmentNormal);
+	if (!gl_FrontFacing) {
+		//ComputeLighting(FragmentColor, vFragmentNormal);
+		vFragmentNormal.xyz *= -1.0;
+		vSurfaceNormal.xyz *= -1.0;
+	}
+
+	//apply lighting
+	vec3 vPreLight = FragmentColor.rgb;
+	ComputeLightingEx(FragmentColor, 1.0003*vFragmentNormal);
+	FragmentColor.rgb = mix(FragmentColor.rgb, vPreLight.xyz, 0.5);
 			
 	#if SPECULAR_LIGHT == 1
 				
@@ -605,13 +617,13 @@ void main ()
 				vec3 vTexEnv = texture2D(texUnit15, vViewToSurface_n.xy).rgb * DiffuseLight.rgb;
 
 				//force in more environment map and area diffuse
-				FragmentColor.rgb = ColorLiquid.rgb + PI*mix(ColorReflection.rgb, vTexEnv, 0.5) * fFresnelSpecularity;
-				//FragmentColor.rgb = ColorLiquid.rgb + ColorReflection.rgb * fFresnelSpecularity;
+				//FragmentColor.rgb = -ColorLiquid.rgb + PI*mix(ColorReflection.rgb, vTexEnv, 0.5) * fFresnelSpecularity;
+				FragmentColor.rgb = ColorLiquid.rgb + ColorReflection.rgb * fFresnelSpecularity;
 
 			#else
 
 				//darken water by distance
-				fRefractionTransparency = clamp(fRefractionTransparency-fDarken, 0.0,0.90);
+				fRefractionTransparency = clamp(fRefractionTransparency-fDarken, 0.0,0.9);
 
 				FragmentColor.rgb = mix(FragmentColor.rgb, ColorRefraction.rgb, fRefractionTransparency);
 							
@@ -636,8 +648,8 @@ void main ()
 	
 	//consider backfaces
 	if (!gl_FrontFacing) {
-		FragmentColor.rgb *=  WaterBaseColor.rgb*fFragLum;
-		FragmentColor.a *= clamp(0.8+fRapids, 0.0,1.0);
+		//FragmentColor.rgb *=  WaterBaseColor.rgb*fFragLum;
+		FragmentColor.a *= clamp(0.9+fRapids, 0.0,1.0);
 	}
 	
 	//edge alpha	
@@ -651,12 +663,22 @@ void main ()
 	
 	FragmentColor.rgb = RevertColorSpace(FragmentColor.rgb);
 
+	//gamma burn
+	#if SOLAR_BURN > 0
+		FragmentColor.rgb = burn(FragmentColor.rgb, clamp(1.0-(distance(vPosWorld.xyz, playerPosition.xyz)/100.0)+SOLAR_BURN_DIST, 1.0/SOLAR_BURN_POWER, 1.0));
+	#endif	
+
 	#if FOG == 1
 		ApplyFog(FragmentColor);
 	#endif
-	
+		
+	#if GAMMA_CORRECTION == 1
+		ApplyColorTonemap(FragmentColor);
+	#endif  
+
 	ApplyDebugModeOutput(FragmentColor);
 		
 	gl_FragColor = FragmentColor;
 	
 }
+

@@ -1,0 +1,47 @@
+#ifndef INC_OPTIONS_MD
+	#define INC_OPTIONS_MD
+
+	//*************************************
+	//Option Switches
+	//*************************************
+
+	//Causes burn by distance from player
+	//1: meshes affected by custom shaders (including water)
+	//2: also affects skybox
+	#define SOLAR_BURN 1
+
+	//Shifts the start distance for burn
+	//Range {-1,1}, negative values pull the range toward the player
+	#define SOLAR_BURN_DIST 0.66
+
+	//Set the burn strength
+	#define SOLAR_BURN_POWER 1.25
+
+
+
+
+
+
+
+
+	//*************************************
+	//Option-related functions. Do not modify
+	//*************************************
+
+
+
+	#ifndef SOLAR_BURN
+		#define SOLAR_BURN 0
+	#endif
+
+	#if SOLAR_BURN > 0
+		vec3 burn (vec3 vColor, float fFactor) 
+		{
+			float fR = pow(vColor.r, 1.0/fFactor);
+			float fG = pow(vColor.g, 1.0/fFactor);
+			float fB = pow(vColor.b, 1.0/fFactor);
+			return vec3(fR, fG, fB);
+		}
+	#endif
+	
+#endif

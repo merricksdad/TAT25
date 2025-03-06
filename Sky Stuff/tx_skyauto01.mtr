@@ -5,13 +5,20 @@ texture0 tx_skyauto01
 texture6 tx_skycolor01
 
 parameter int USE_SUN_ORBIT_FLEX 0
-parameter float SunIntensity 1.5
+parameter float SunIntensity 3.0
 parameter float SunRadius 5.0
 parameter int RENDER_SUN_LATE 0
-parameter int RENDER_SUN_GLOW 1
 parameter int RENDER_SUN_NOISE 0
 
-parameter float MoonIntensity 1.0
+##Sun Glow Options 
+##0 = off
+##1 = standard mix day diffuse color (old way)
+##2 = small fraction add diffuse color
+##3 = opposite standard mix plus small fraction add
+parameter int RENDER_SUN_GLOW 1
+
+
+parameter float MoonIntensity 0.5
 parameter float MoonRadius 4.0
 parameter int RENDER_MOON_PHASES 0
 parameter int RENDER_MOON_LATE 0
@@ -20,6 +27,9 @@ parameter int RENDER_MOON_GLOW 1
 parameter int USE_SECOND_MOON 0
 parameter float SecondMoonIntensity 0.2
 parameter float SecondMoonRadius 3.0
+##0 second moon after first
+##1 second moon before first
+parameter float SECOND_MOON_ORDER 1
 
 parameter int RENDER_STARS 1
 parameter float StarDensity 0.2

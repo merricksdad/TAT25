@@ -16,6 +16,7 @@ uniform float FoliageMaxDrawDist;
 
 void TransformFoliageCoordinates()
 {
+	
 	vec4 vLocalPosition = vec4(0.0, 0.0, 0.0, 0.0);
 	
 	#if NO_TEXTURE != 1
@@ -42,6 +43,15 @@ void TransformFoliageCoordinates()
 	
 	vLocalPosition = vPos;
 	
+	if (FoliageMaxDrawDist != 0.0) {
+		vec4 vPosTemp = (m_m * vLocalPosition);
+		float fDist = distance(vPosTemp.xyz, cameraPosition.xyz);
+		if (fDist > FoliageMaxDrawDist) {
+			//move vert outside clipspace
+			gl_Position = vec4(1,1,1,0);
+			return;
+		}	
+	}
 	
 	//NEW Shake Shader		
 	#if SHADER_QUALITY_MODE > 0
@@ -207,7 +217,6 @@ void TransformFoliageCoordinates()
 
 	#if POSITION_VIEW == 1
 		vPosView = (m_mv * vLocalPosition).xyz;
-
 		vPosProj = m_proj * vec4(vPosView.x, vPosView.y, vPosView.z, 1.0);
 
 		#if NORMAL_MAP == 1
@@ -235,9 +244,6 @@ void TransformFoliageCoordinates()
 		vPosWorld = (m_vp_inv * vPosProj).xyz;
 	#endif 
 	
-
-
-
 
 }
 

@@ -5,7 +5,7 @@
  texture1 tat25_floor08n2
  texture6 tat25_wall04
  texture7 tat25_wall04n
- parameter float Specularity 0.70
+ parameter float Specularity 0.20
  parameter float Roughness 0.75
  parameter float TopBias -0.3
  parameter float TexWidth 3.0

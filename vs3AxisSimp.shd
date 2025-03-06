@@ -27,43 +27,18 @@
 //parameters from material
 uniform float TopBias;
 
-
 #include "inc_standard_md"
+#include "inc_light_md"
 
 varying float fDistFragToCamera;
 varying float fDistFragToPlayer;
 
 varying vec3 vMixing;
 
-//like normalization, except linear not spherical. 
-//All values must add to one. A + B + C = 1.0
-vec3 ToUnity(vec3 vValue)
-{
-	//prevent divide by zero
-	return vValue/max(abs(vValue.x) + abs(vValue.y) + abs(vValue.z), 0.0001);
-}
-
-//applies the power function but retains the original sign, which allows proper float powers to be applied
-float spow (float fValue, float fPower)
-{
-	return sign(fValue) * pow(abs(fValue), fPower);
-}
-
-//applies the power function but retains the original sign, which allows proper float powers to be applied
-vec3 spow (vec3 vValue, float fPower)
-{
-	return vec3(
-		sign(vValue.x) * pow(abs(vValue.x), fPower),
-		sign(vValue.y) * pow(abs(vValue.y), fPower),
-		sign(vValue.z) * pow(abs(vValue.z), fPower)
-	);
-}
-
-
-
 void main ()
 {
-    ApplyStandardShader();
+	SetupSunAndMoon();
+	ApplyStandardShader();
 	
 
 //==============================

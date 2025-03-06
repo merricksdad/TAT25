@@ -1,12 +1,14 @@
+#include "nw_inc_gff"
+
 // Module variable to set latitude. Zero will use default. If you actually want to use Equator, use 0.001 or similar.
 const string    NW_DYNAMIC_LIGHT_MODULE_GLOBAL_LATITUDE = "MODULE_GLOBAL_LATITUDE";
-const float     NW_DYNAMIC_LIGHT_MODULE_GLOBAL_LATITUDE_DEFAULT = 45.0;
+const float     NW_DYNAMIC_LIGHT_MODULE_GLOBAL_LATITUDE_DEFAULT = 45.0; //45
 
-const float     NW_DYNAMIC_LIGHT_GLOBE_ROTATION_AXIAL_TILT = 23.5;
-const float     NW_DYNAMIC_LIGHT_MOON_ROTATION_AXIAL_TILT = 5.1;
+const float     NW_DYNAMIC_LIGHT_GLOBE_ROTATION_AXIAL_TILT =23.5; //23.5
+const float     NW_DYNAMIC_LIGHT_MOON_ROTATION_AXIAL_TILT = 5.1; //5.1
 
-const float     NW_DYNAMIC_LIGHT_FADE_TIME = 10.0;
-const float     NW_DYNAMIC_LIGHT_FADE_TIME_OVERLAP = 2.0;
+const float     NW_DYNAMIC_LIGHT_FADE_TIME = 0.0; //10.0
+const float     NW_DYNAMIC_LIGHT_FADE_TIME_OVERLAP = 0.0; //2.0
 
 const float     NW_DYNAMIC_LIGHT_SUN_REDSHIFT_COLOR_RED=1.0;
 const float     NW_DYNAMIC_LIGHT_SUN_REDSHIFT_COLOR_GREEN=0.8;
@@ -27,7 +29,7 @@ const string    NW_DYNAMIC_LIGHT_RUNNING = "NW_DYNAMIC_LIGHT_RUNNING";
 const float     NW_DYNAMIC_LIGHT_AZIMUTH_OFFSET = 0.1;
 //const float NW_DYNAMIC_LIGHT_AZIMUTH_OFFSET = -180.0;
 
-const float     NW_HORIZON_OFFSET = -0.15;
+const float     NW_HORIZON_OFFSET = -0.0; //-0.15
 
 
 //Get the dot product of two vectors
@@ -120,16 +122,90 @@ void PrintDebugMessage(string sMsg)
     /* DEBUG *///SendMessageToPC(GetFirstPC(),sMsg);
 }
 
+//custom function to get module time
+float GetModuleTime()
+{
+    float fModuleHour = 0.0;
+
+    //get module minutes
+    fModuleHour += IntToFloat(GetTimeMinute());
+    fModuleHour += IntToFloat(GetTimeSecond())/60.0f;
+    fModuleHour += IntToFloat(GetTimeMillisecond())/60000.0f;
+
+    //divide by module minutes per hour to get fraction of hour
+    float fModuleMinutesPerHour = HoursToSeconds(1) / 60.0f;
+    fModuleHour /= fModuleMinutesPerHour;
+
+    //add module hour
+    fModuleHour += IntToFloat(GetTimeHour());
+    return fModuleHour;
+}
+
+float GetDuskDawnModifiedModuleTime()
+{
+    //manage sunrise/sunset module settings
+    object oModule = GetModule();
+    int nDawnHour, nDuskHour;
+
+    int nDuskDawnStored = GetLocalInt(oModule, "DUSK_DAWN_STORED");
+    if (!nDuskDawnStored) {
+        json jModule = TemplateToJson("module", RESTYPE_IFO);
+        nDawnHour = JsonGetInt(GffGetByte(jModule, "Mod_DawnHour"));
+        nDuskHour = JsonGetInt(GffGetByte(jModule, "Mod_DuskHour"));
+
+        SetLocalInt(oModule, "DAWN_HOUR", nDawnHour);
+        SetLocalInt(oModule, "DUSK_HOUR", nDuskHour);
+        SetLocalInt(oModule, "DUSK_DAWN_STORED", 1);
+    } else {
+        nDawnHour = GetLocalInt(oModule, "DAWN_HOUR");
+        nDuskHour = GetLocalInt(oModule, "DUSK_HOUR");
+    }
+
+    //get the normal module time
+    float fModuleHour = GetModuleTime();
+    float fDuskHour = IntToFloat(nDuskHour);
+    float fDawnHour = IntToFloat(nDawnHour);
+
+    //modify apparent module time to force compliance with module dusk and dawn hours
+    if (fModuleHour < 12.0) {
+        //bend the hour toward 6 to align with horizon sunrise
+        if (fModuleHour < fDawnHour) {
+            fModuleHour = (6.0 / fDawnHour) * fModuleHour;
+        } else {
+            fModuleHour = (6.0 / (12.0 - fDawnHour)) * (fModuleHour - fDawnHour) + 6.0;
+        }
+    } else {
+        //bend the hour toward 18 to align with horizon sunset
+        if (fModuleHour < fDuskHour) {
+            fModuleHour = (6.0 / (fDuskHour - 12.0)) * (fModuleHour - 12.0) + 12.0;
+        } else {
+            fModuleHour = (6.0 / (24.0 - fDuskHour)) * (fModuleHour - fDuskHour) + 18.0;
+        }
+    }
+    return fModuleHour;
+}
+
 // Get sunlight direction based on time of day, latitude, and calendar information
 vector GetSunlightDirectionFromTime(float fLatitude, float fTimeOffset)
 {
-    float fRelativeTimeOfYear = (HoursToSeconds(((GetCalendarMonth()-1)*28 + (GetCalendarDay()-1)) * 24 + GetTimeHour()) + IntToFloat(GetTimeMinute() * 60 + GetTimeSecond()) + fTimeOffset) /  HoursToSeconds(12 * 28 * 24);
+    /*float fRelativeTimeOfYear = (
+        HoursToSeconds(
+            (
+                (GetCalendarMonth()-1)*28
+                + (GetCalendarDay()-1))*24
+                + GetTimeHour()
+            )
+            + IntToFloat(
+                GetTimeMinute() * 60 + GetTimeSecond()
+            ) //+ fTimeOffset
+        ) /  HoursToSeconds(12 * 28 * 24);
+    */
 
     //angle in sky at noon is latitude + yearly tilt cycle
-    float fVerticalPeakAngle = fLatitude + cos(fRelativeTimeOfYear * 360.0) * NW_DYNAMIC_LIGHT_GLOBE_ROTATION_AXIAL_TILT;
+    float fVerticalPeakAngle = fLatitude - NW_DYNAMIC_LIGHT_GLOBE_ROTATION_AXIAL_TILT ;//+ cos(fRelativeTimeOfYear * 360.0) * NW_DYNAMIC_LIGHT_GLOBE_ROTATION_AXIAL_TILT;
 
     //try to keep sun a little lower in the sky
-    fVerticalPeakAngle *= 1.2;
+    //fVerticalPeakAngle *= 1.2;
 
     // Since we have static day/night times, dawn and dusk is always east and west respectively.
     vector vRise = Vector(cos(fVerticalPeakAngle), sin(fVerticalPeakAngle), NW_HORIZON_OFFSET);
@@ -137,7 +213,11 @@ vector GetSunlightDirectionFromTime(float fLatitude, float fTimeOffset)
 
     vector vHigh = Vector(0.0, -sin(fVerticalPeakAngle), cos(fVerticalPeakAngle));
 
-    float fRelativeTime = (HoursToSeconds(GetTimeHour()) + IntToFloat( GetTimeMinute() * 60 + GetTimeSecond())+fTimeOffset) / (HoursToSeconds(24));
+    //time offset here will force mixing toward the rise and set positions
+    float fRelativeTime = GetDuskDawnModifiedModuleTime()+fTimeOffset;
+    while (fRelativeTime > 24.0) fRelativeTime -= 24.0;
+    while (fRelativeTime < 0.0) fRelativeTime += 24.0;
+    fRelativeTime /= 24.0;
 
 
     //assuming horizons at 6AM and 6PM...
@@ -147,8 +227,10 @@ vector GetSunlightDirectionFromTime(float fLatitude, float fTimeOffset)
     //saturate brings it back to 6 to 6 but forced approach to sunset.
     //fRelativeTime = saturate((fRelativeTime - 0.25) * 2.0);
 
+    //fixed to allow negative horizon
+    fRelativeTime = (fRelativeTime - 0.25) * 2.0;
 
-    fRelativeTime = saturate((fRelativeTime - 0.1667) * 1.42);
+    //get previously stored dawn and dusk times
 
     if(fRelativeTime>0.5)
     {
@@ -163,18 +245,12 @@ vector GetSunlightDirectionFromTime(float fLatitude, float fTimeOffset)
 }
 
 // Get moonlight direction based on time of day, latitude, and calendar information
-vector GetMoonlightDirectionFromTime(float fLatitude, float fTimeOffset, int nLag = 1)
+vector GetMoonlightDirectionFromTime(float fLatitude, float fTimeOffset, float fLag = 1.0)
 {
-
-    //assume moon almost directly opposite for simplified lighting
-    int nOppositeHour = GetTimeHour() + 12 - nLag;
-    if (nOppositeHour >= 24) nOppositeHour -= 24;
-
     //float fRelativeTimeOfYear = (HoursToSeconds(((GetCalendarMonth()-1)*28 + (GetCalendarDay()-1)) * 24 + nOppositeHour) + IntToFloat(GetTimeMinute() * 60 + GetTimeSecond()) + fTimeOffset) /  HoursToSeconds(12 * 28 * 24);
 
     //angle in sky at noon is latitude
-    //keep angle low
-    float fVerticalPeakAngle = fLatitude * 1.3;
+    float fVerticalPeakAngle = (fLatitude - NW_DYNAMIC_LIGHT_GLOBE_ROTATION_AXIAL_TILT) - NW_DYNAMIC_LIGHT_MOON_ROTATION_AXIAL_TILT;
 
     // Since we have static day/night times, dawn and dusk is always east and west respectively.
     vector vRise = Vector(cos(fVerticalPeakAngle), sin(fVerticalPeakAngle), NW_HORIZON_OFFSET);
@@ -182,8 +258,11 @@ vector GetMoonlightDirectionFromTime(float fLatitude, float fTimeOffset, int nLa
 
     vector vHigh = Vector(0.0, -sin(fVerticalPeakAngle), cos(fVerticalPeakAngle));
 
-    float fRelativeTime = (HoursToSeconds(nOppositeHour) + IntToFloat( GetTimeMinute() * 60 + GetTimeSecond())+fTimeOffset) / (HoursToSeconds(24));
-
+    //assume moon almost directly opposite for simplified lighting
+    float fRelativeTime = GetDuskDawnModifiedModuleTime()+fTimeOffset+12.0-fLag;
+    while (fRelativeTime > 24.0) fRelativeTime -= 24.0;
+    while (fRelativeTime < 0.0) fRelativeTime += 24.0;
+    fRelativeTime /= 24.0;
 
     //assuming horizons at 6AM and 6PM...
     //6AM would be 0.0 and 6PM would be 1.0
@@ -192,8 +271,9 @@ vector GetMoonlightDirectionFromTime(float fLatitude, float fTimeOffset, int nLa
     //saturate brings it back to 6 to 6 but forced approach to sunset.
     //fRelativeTime = saturate((fRelativeTime - 0.25) * 2.0);
 
+    //fixed to allow negative horizon
+    fRelativeTime = (fRelativeTime - 0.25) * 2.0;
 
-    fRelativeTime = saturate((fRelativeTime - 0.1667) * 1.42);
 
     if(fRelativeTime>0.5)
     {
@@ -209,18 +289,14 @@ vector GetMoonlightDirectionFromTime(float fLatitude, float fTimeOffset, int nLa
 
 // Get moonlight direction based on time of day, latitude, and calendar information
 // this is for a second moon
-vector GetMoonlightDirectionFromTime2(float fLatitude, float fTimeOffset, int nLag = 3, float fSpeed = 1.25)
+vector GetMoonlightDirectionFromTime2(float fLatitude, float fTimeOffset, float fLag = 3.0, float fSpeed = 1.25)
 {
-
-    //assume moon almost directly opposite for simplified lighting
-    int nOppositeHour = GetTimeHour() + 12 - nLag;
-    if (nOppositeHour >= 24) nOppositeHour -= 24;
 
     //float fRelativeTimeOfYear = (HoursToSeconds(((GetCalendarMonth()-1)*28 + (GetCalendarDay()-1)) * 24 + nOppositeHour) + IntToFloat(GetTimeMinute() * 60 + GetTimeSecond()) + fTimeOffset) /  HoursToSeconds(12 * 28 * 24);
 
     //angle in sky at noon is just latitude
     //keep angle low
-    float fVerticalPeakAngle = fLatitude*1.1;
+    float fVerticalPeakAngle = (fLatitude - NW_DYNAMIC_LIGHT_GLOBE_ROTATION_AXIAL_TILT) - NW_DYNAMIC_LIGHT_MOON_ROTATION_AXIAL_TILT;
 
     // Since we have static day/night times, dawn and dusk is always east and west respectively.
     vector vRise = Vector(cos(fVerticalPeakAngle), sin(fVerticalPeakAngle), NW_HORIZON_OFFSET);
@@ -228,11 +304,12 @@ vector GetMoonlightDirectionFromTime2(float fLatitude, float fTimeOffset, int nL
 
     vector vHigh = Vector(0.0, -sin(fVerticalPeakAngle), cos(fVerticalPeakAngle));
 
-    float fRelativeTime = (HoursToSeconds(nOppositeHour) + IntToFloat( GetTimeMinute() * 60 + GetTimeSecond())+fTimeOffset) / (HoursToSeconds(24));
-
-    //change speed of second moon
+    //assume moon almost directly opposite for simplified lighting
+    float fRelativeTime = GetDuskDawnModifiedModuleTime()+fTimeOffset+12.0-fLag;
     fRelativeTime *= fSpeed;
-
+    if (fRelativeTime >= 24.0) fRelativeTime -= 24.0;
+    if (fRelativeTime < 0.0) fRelativeTime += 24.0;
+    fRelativeTime /= 24.0;
 
     //assuming horizons at 6AM and 6PM...
     //6AM would be 0.0 and 6PM would be 1.0
@@ -241,8 +318,10 @@ vector GetMoonlightDirectionFromTime2(float fLatitude, float fTimeOffset, int nL
     //saturate brings it back to 6 to 6 but forced approach to sunset.
     //fRelativeTime = saturate((fRelativeTime - 0.25) * 2.0);
 
+    //fixed to allow negative horizon
+    fRelativeTime = (fRelativeTime - 0.25) * 2.0;
 
-    fRelativeTime = saturate((fRelativeTime - 0.1667) * 1.42);
+
 
     if(fRelativeTime>0.5)
     {
@@ -260,6 +339,8 @@ vector GetMoonlightDirectionFromTime2(float fLatitude, float fTimeOffset, int nL
 // Add redshift value to an existing color
 vector ApplyRedshiftToColor(vector vColor, float fRedshift)
 {
+    return vColor;
+    /*
     float fBrightness = (vColor.x + vColor.y + vColor.z) / 3.0;
     if(fBrightness > 0.01)
     {
@@ -279,11 +360,15 @@ vector ApplyRedshiftToColor(vector vColor, float fRedshift)
     }
 
     return vColor;
+    */
 }
 
 // Add redshift to area fog, ambient and diffuse lighting based on time of day
 void ApplyRedshift(object oArea, float fSunAzimuth, float fFadeTime)
 {
+    return;
+
+    /*
     //float fRedshift = cos((fSunAzimuth) / (1.0 / 90.0)) * 6.0 - 5.0;
     float fRedshift = cos((fSunAzimuth) / (1.0 / 90.0));
     if(fRedshift < 0.0)
@@ -305,11 +390,14 @@ void ApplyRedshift(object oArea, float fSunAzimuth, float fFadeTime)
     SetFogColor(FOG_TYPE_SUN, VectorRGBToInt(vColorFog), oArea, fFadeTime);
     SetAreaLightColor(AREA_LIGHT_COLOR_SUN_AMBIENT, VectorRGBToInt(vColorAmbient), oArea, fFadeTime);
     SetAreaLightColor(AREA_LIGHT_COLOR_SUN_DIFFUSE, VectorRGBToInt(vColorDiffuse), oArea, fFadeTime);
+    */
 }
 
 //handles setting the area fog and lighting schema
 void SetAreaColorScheme(object oArea, float fFadeTime)
 {
+    return;
+    /*
     //identify if area is foggy
     //note: uses area original fog color as backup
     vector vFogColor = IntRGBToVector(GetLocalInt(oArea, NW_DYNAMIC_LIGHT_ORIGINAL_AREA_FOG_COLOR));
@@ -324,12 +412,15 @@ void SetAreaColorScheme(object oArea, float fFadeTime)
     SetFogColor(FOG_TYPE_SUN, VectorRGBToInt(vFogColor), oArea, fFadeTime);
     SetAreaLightColor(AREA_LIGHT_COLOR_SUN_AMBIENT, VectorRGBToInt(vAmbientColor), oArea, fFadeTime);
     SetAreaLightColor(AREA_LIGHT_COLOR_SUN_DIFFUSE, VectorRGBToInt(vDiffuseColor), oArea, fFadeTime);
+    */
 }
 
 
 // Shift the position of the area lighting while adjusting redshift for time of day
 void AutoUpdateLight(int bRecursive)
 {
+    return;
+    /*
     float fFadeTime = 0.0;
     if(bRecursive)
     {
@@ -379,35 +470,50 @@ void AutoUpdateLight(int bRecursive)
     {
         DelayCommand(NW_DYNAMIC_LIGHT_FADE_TIME, ExecuteScript("nw_dynlight_recu"));
     }
+    */
 }
 
 // Store original area light colors and onEnter script
 // Replace the onEnter script with the dynamic light onEnter script, which will call the original script
 void InitializeAllAreas()
 {
+    return;
+    /*
     WriteTimestampedLogEntry("Auto area light manager is initializing areas...");
     object oArea = GetFirstArea();
     while(oArea != OBJECT_INVALID)
     {
         if(!GetIsAreaInterior(oArea) && GetIsAreaAboveGround(oArea))
         {
+            //store original fog color
             int nFogColor = GetFogColor(FOG_TYPE_SUN, oArea);
             SetLocalInt(oArea, NW_DYNAMIC_LIGHT_ORIGINAL_AREA_FOG_COLOR, nFogColor);
+
+            //store original ambient color
             int nAmbientColor = GetAreaLightColor(AREA_LIGHT_COLOR_SUN_AMBIENT, oArea);
             SetLocalInt(oArea, NW_DYNAMIC_LIGHT_ORIGINAL_AREA_AMBIENT_COLOR, nAmbientColor);
+
+            //store original diffuse color
             int nDiffuseColor = GetAreaLightColor(AREA_LIGHT_COLOR_SUN_DIFFUSE, oArea);
             SetLocalInt(oArea, NW_DYNAMIC_LIGHT_ORIGINAL_AREA_DIFFUSE_COLOR, nDiffuseColor);
+
+            //store the name of the original area on-enter script
             string sEventScript = GetEventScript(oArea, EVENT_SCRIPT_AREA_ON_ENTER);
             SetLocalString(oArea, NW_DYNAMIC_LIGHT_ORIGINAL_AREA_ENTER_SCRIPT, sEventScript);
+
+            //replace the on-enter script, which will nest call the original when needed
             SetEventScript(oArea, EVENT_SCRIPT_AREA_ON_ENTER, "nw_dynlight_ae");
         }
         oArea = GetNextArea();
     }
+    */
 }
 
 // Restore original area light color and onEnter script
 void ResetAllAreas()
 {
+    return;
+    /*
     WriteTimestampedLogEntry("Auto area light manager is resetting all areas to initital values...");
     object oArea = GetFirstArea();
     while(oArea != OBJECT_INVALID)
@@ -429,6 +535,7 @@ void ResetAllAreas()
         }
         oArea = GetNextArea();
     }
+    */
 }
 
 

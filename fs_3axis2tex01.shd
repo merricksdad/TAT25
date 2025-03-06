@@ -27,6 +27,7 @@
 
 #define POSITION_WORLD 1
 
+#define THREE_AXIS_SHADER 1
 #define NUM_TEXTURES 2
 #define GLOW_MAP 0
 #define FORCE_ALLOW_DISCARD 1
@@ -44,7 +45,6 @@ varying float fDistFragToCamera;
 //******************************************
 //   END Three Axis Shader Guts
 //******************************************
-
 
 
 void main ()
@@ -69,16 +69,10 @@ void main ()
 	//******************************************
 	
     FragmentColor = vec4(1.0);
-
-	//float fDistToCamera = distance(vPosWorld.xyz, playerPosition.xyz);	
-	//if (fDistFragToCamera < 90.0) {
-		SetupThreeAxisShaderInputs();
-		ApplyThreeAxisShader();
-	//} else {
-
-		//SetupStandardShaderInputs();
-		//ApplyStandardShader();
-	//}
-		
+	
+	SetupSunAndMoon();	
+	SetupThreeAxisShaderInputs();
+	ApplyThreeAxisShader();
+	
     gl_FragColor = FragmentColor;
 }
