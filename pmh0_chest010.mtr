@@ -1,0 +1,6 @@
+customshadervs vslit_nm
+customshaderfs fslit_mixplt
+renderhint NormalAndSpecMapped
+texture6 pmh0_chest010_m
+texture7 pmh0_chest010_o
+ 

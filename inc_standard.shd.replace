@@ -1,0 +1,9 @@
+// AN OVERRIDE INSERT TO REDIRECT "INC_STANDARD" TO "INC_STANDARD_MD"
+
+
+#ifndef POSITION_WORLD 
+#define POSITION_WORLD 1
+#endif
+
+#include "inc_standard_md"
+
