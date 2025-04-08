@@ -1,6 +1,7 @@
 #define SHADER_TYPE 2
 #define FORCE_ALLOW_DISCARD 1
 #define SKIP_NORMAL 1
+#define WATER_SHADER 1
 
 highp float fRoughness;
 #define MATERIAL_ROUGHNESS_VALUE fRoughness
@@ -10,6 +11,9 @@ lowp float fSpecularity;
 
 #define MATERIAL_METALLICNESS_VALUE 0.0
 #define MATERIAL_SPECULAR_COLOR_VALUE vec3(1.0, 1.0, 1.0)
+
+//define this before adding inc_light
+float fDarken;
 
 #include "inc_options_md"
 #include "inc_water_md"
@@ -35,6 +39,8 @@ float fSurfaceNdotV;
 float fRapids;
 
 vec3 vSurfaceNormalWorld;
+
+
 
 void SetupWind(float fFragmentDepthOffset)
 {	
@@ -413,7 +419,7 @@ void main ()
 	fRapids = clamp(2.0*fRapids, 0.0, 1.0);	
 
 	//darken water by distance
-	float fDarken = length(vPosWorld.xyz - cameraPosition.xyz)/33.0;
+	fDarken = length(vPosWorld.xyz - cameraPosition.xyz)/33.0;
 	fDarken = 1.0-(pow(1.0-fDarken, 2.1));
 		
 	fDarken = clamp (fDarken, 0.05, WaterBaseColor.a);
@@ -527,9 +533,9 @@ void main ()
 	}
 
 	//apply lighting
-	vec3 vPreLight = FragmentColor.rgb;
-	ComputeLightingEx(FragmentColor, 1.0003*vFragmentNormal);
-	FragmentColor.rgb = mix(FragmentColor.rgb, vPreLight.xyz, 0.5);
+	//vec3 vPreLight = FragmentColor.rgb;
+	ComputeLightingEx(FragmentColor, vFragmentNormal);
+	//FragmentColor.rgb = mix(FragmentColor.rgb, vPreLight.xyz, 0.5);
 			
 	#if SPECULAR_LIGHT == 1
 				
@@ -584,11 +590,19 @@ void main ()
 				vec3 ColorLiquid = WaterBaseColor.rgb * SubsurfaceLight;
 
 				vec3 vReflect = reflect(vViewToSurface_n, vFragmentNormal);
-					
+									
 				vec4 vReflectedCoords = GetReflectionCoords(vPosViewThis.xyz, vReflect, fDepthOffset);
+								
+				float fReflectionMod = clamp(1.0 - vReflectedCoords.w, 0.0, 1.0);
 				
-				float fReflectionMod = clamp(1.0 - vReflectedCoords.w, 0.0, 1.0);;
+				vec3 vTexEnv; 
 
+				if (fDayBrightness > (4.41*fNightBrightness)) {
+					vTexEnv = fDayBrightness * mix(texture2D(texUnit15, vec2(0.5), 20.0).rgb, vSunColor.rgb, 0.5);
+				} else {
+					vTexEnv = fNightBrightness * mix(texture2D(texUnit15, vec2(0.5), 20.0).rgb, vMoonColor.rgb, 0.5);					
+				}
+				
 				if(fReflectionMod >=0.0) 
 				{
 					ColorReflection = ApplyColorSpace(texture2D(texFBColor, clamp(vReflectedCoords.xy, vec2(0.001), vec2(0.999))).rgb);
@@ -597,7 +611,16 @@ void main ()
 					fReflectionMod *= 1.0-GetFogAlpha(GetFog(-vReflectedCoords.z));
 					
 					ColorReflection = mix(COLOR_BLACK.rgb, ColorReflection, clamp(0.1-4.0*(dot(vReflectedNormal, vReflect)) ,0.0, 1.0));
+					
+					//calculate how bright the reflection is
+					float fReflectionLum = clamp(length(ColorReflection.xyz), 0.0, 1.0);
+					fReflectionMod *= clamp(fReflectionLum * 2.0, 0.0, 1.0);
+
+					//reflect only when bright
 					ColorReflection = mix(FragmentColor.rgb, ColorReflection, fReflectionMod) ;
+					
+					//where not bright, instead fill will blurred envmap color
+					ColorReflection = mix(ColorReflection.rgb, vTexEnv.rgb, 1.0-fReflectionMod) ;
 				}
 				else
 				{
@@ -605,7 +628,7 @@ void main ()
 				}
 					
 				//darken water by distance
-				fRefractionTransparency = clamp(fRefractionTransparency-fDarken, 0.0,0.9);
+				fRefractionTransparency = clamp(fRefractionTransparency-fDarken, 0.01,0.33);
 
 					
 				ColorLiquid.rgb = mix(ColorLiquid.rgb, ColorRefraction,  fRefractionTransparency);
@@ -614,7 +637,6 @@ void main ()
 
 				float fFresnelSpecularity = GetFresnelSpecularity(WATER_SPECULARITY,fNdotV);
 
-				vec3 vTexEnv = texture2D(texUnit15, vViewToSurface_n.xy).rgb * DiffuseLight.rgb;
 
 				//force in more environment map and area diffuse
 				//FragmentColor.rgb = -ColorLiquid.rgb + PI*mix(ColorReflection.rgb, vTexEnv, 0.5) * fFresnelSpecularity;

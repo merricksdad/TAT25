@@ -1,6 +1,6 @@
 //=============================================================================
 //
-// vsFoliage.shd
+// vslit_nm.shd
 //
 //=============================================================================
 
@@ -12,27 +12,22 @@
 #define NORMAL_MAP 1
 #define LIGHTING 1
 
-#define FOLIAGE_SHADER 1
+#define FOLIAGE_SHADER 0
 #define POSITION_WORLD 1
 
 //varying float fDistFragToCamera;
 //varying float fDistFragToPlayer;
 
+//include "inc_options_md"
 #include "inc_standard_md"
 #include "inc_random"
-#include "inc_windshake"
 #include "inc_light_md"
 
 void main ()
 {
 	SetupSunAndMoon();
 
-	if (FoliageWindMax > 0.0) {
-		ApplyFoliageShakeShader();
-	} else {
-		ApplyStandardShader();
-	}
-
+	ApplyStandardShader();	
 
 	fDistFragToCamera = distance(vPosWorld.xyz, cameraPosition.xyz);
 	fDistFragToPlayer = distance(vPosWorld.xyz, playerPosition.xyz);	

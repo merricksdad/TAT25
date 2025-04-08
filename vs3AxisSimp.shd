@@ -27,11 +27,15 @@
 //parameters from material
 uniform float TopBias;
 
+
 #include "inc_standard_md"
 #include "inc_light_md"
 
-varying float fDistFragToCamera;
-varying float fDistFragToPlayer;
+//varying float fDistFragToCamera;
+//varying float fDistFragToPlayer;
+
+
+
 
 varying vec3 vMixing;
 
@@ -95,6 +99,5 @@ void main ()
 	//the values range from +1 to -1
 	//where up, front, and left refer to up, south, and west respectively
 	//and negative values point to down, north, and east
-	
 	
 }

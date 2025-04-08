@@ -12,13 +12,27 @@
 
 	//Shifts the start distance for burn
 	//Range {-1,1}, negative values pull the range toward the player
-	#define SOLAR_BURN_DIST 0.66
+	#define SOLAR_BURN_DIST 0.0
 
 	//Set the burn strength
-	#define SOLAR_BURN_POWER 1.25
+	#define SOLAR_BURN_POWER 1.5
+	
+	//enable/disable foliage culling by distance
+	#define FOLIAGE_CULLING_ENABLED 1
+	
+	//Set the default cull distance for foliage shader 
+	//Note: to disable culling per material, set parameter FoliageMaxDrawDist = -1.0
+	#define FOLIAGE_DEFAULT_CULL_DISTANCE 45.0
 
+	//Set the default lighting distance for foliage shader 
+	//Note: to disable, set value to -1.0
+	#define FOLIAGE_DEFAULT_LIGHTING_DISTANCE 15.0
 
-
+	//enable/disable foliage brightening by original saturation
+	#define FOLIAGE_SATURATION_BRIGHTENING_ENABLED 0
+	
+	//enable distance perspective transform
+	#define PERSPECTIVE_SHIFT 0
 
 
 

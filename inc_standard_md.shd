@@ -1,11 +1,21 @@
 //=============================================================================
 //
-// inc_standard.shd
+// inc_standard_md.shd
+// 
+// This file replaces inc_standard in custom shader scripts
+// and can be called instead of inc_standard wherever needed
 //
 //=============================================================================
 
 #ifndef INC_STANDARD
 	#define INC_STANDARD
+
+	varying float fDistFragToCamera;
+	varying float fDistFragToPlayer;
+	
+	bool bIsToolset;
+
+	#include "inc_options_md"
 
 	#include "inc_lighting"
 
@@ -20,16 +30,34 @@
 	#include "inc_tonemap"
 	#include "inc_scriptable"
 
+
 	///////////////////////////////////
 	//
 	// BEGIN INC_STANDARD
 	//
 	///////////////////////////////////
+	
+	void CheckIsToolset()
+	{
+		bIsToolset = true;
+		
+		vec4 vSun = scriptableVec1;
+		vec4 vMoon = scriptableVec2;
+		
+		//check if toolset
+		if (vSun.xyz != vec3(0.0)) {
+			if (vMoon.xyz != vec3(0.0)) {
+				bIsToolset = false;
+			}				
+		}
+		
+	}
 
 	// Vertex shader
 	#if SHADER_TYPE == 1
 	void ApplyStandardShader()
 	{
+		CheckIsToolset();
 		TransformMainCoordinates();
 
 		#if KEYHOLING == 1
@@ -321,6 +349,7 @@
 		#endif
 	}
 
+/*
 	#if FOG == 1
 	float GetHorizonMod()
 	{
@@ -372,9 +401,11 @@
 	}
 
 	#endif
-
+*/
 	void ApplyStandardShader()
 	{
+		//CheckIsToolset();
+
 		#if LIGHTING == 1
 
 			#if FRAGMENT_LIGHTING == 1 || FRAGMENT_NORMAL == 1

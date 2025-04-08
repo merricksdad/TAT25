@@ -1,16 +1,7 @@
 //=============================================================================
 //
 // fsFoliage.shd
-// based on fslit_nm.shd
 //
-
-/*
-	This foliage shader removes white lines due to fresnel glare around textures,
-	allows backfaces to be lit at light rates that differ from the front face, 
-	and rewrites decal-style punchthrough blending.
-	
-	Additional options include 
-*/
 //=============================================================================
 
 #define SHADER_TYPE 2
@@ -32,8 +23,8 @@
 
 #define FOLIAGE_SHADER 1
 
-varying float fDistFragToCamera;
-varying float fDistFragToPlayer;
+//varying float fDistFragToCamera;
+//varying float fDistFragToPlayer;
 
 
 #include "inc_standard_md"
@@ -48,10 +39,12 @@ uniform mat4 m_mvp;
 
 void main ()
 {
+	/*
 	//do not draw foliage beyond a certain distance 
 	if (FoliageMaxDrawDist != 0.0) {
 		if (fDistFragToCamera > FoliageMaxDrawDist) discard;
 	}
+	*/
 
 	//initialize
     FragmentColor = vec4(1.0);

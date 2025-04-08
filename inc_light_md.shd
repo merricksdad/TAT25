@@ -15,31 +15,24 @@
 			vec3 vPosSun = scriptableVec1.xyz;
 			vec3 vPosMoon = scriptableVec2.xyz;
 
+			//put in world view coordinates
 			lightSunDir = (m_mv * vec4(vPosSun.x, vPosSun.y, vPosSun.z, 0.0)).xyz;
 			lightMoonDir = (m_mv * vec4(vPosMoon.x, vPosMoon.y, vPosMoon.z, 0.0)).xyz;
 
-
 			//do this calculation just once
-			//add an hour here to force light before rise and dark before set
-			//fDayBrightness = 1.0-(abs(((moduleHour+1.0)/24.0)-0.5)*2.0);
 			fDayBrightness = 1.0-min(abs(GetAngleBetween(vec3(0.0,0.0,1.0), vPosSun.xyz)), 100.0)/100.0;
 			fNightBrightness = 1.0-min(abs(GetAngleBetween(vec3(0.0,0.0,1.0), vPosMoon.xyz)), 100.0)/100.0;
-
 			
-			//widen brightness 
-			//fDayBrightness = 1.0-pow(1.0-fDayBrightness, 2.1);
+			//widen day brightness 
 			fDayBrightness *= 2.0;
 			fDayBrightness = min(fDayBrightness, 1.0);
-			//fNightBrightness *= 2.0;
-			//fNightBrightness = min(fNightBrightness, 1.0);
 			
+			//make night darker
 			fNightBrightness *= 0.05;
 		}	
 	
 	#elif SHADER_TYPE == 2
-	
-		bool bIsToolset;
-		
+			
 		//==============================
 		//	    SUN AND MOON
 		//==============================
@@ -70,11 +63,15 @@
 		//lighting factors
 		vec3 vCameraView_n;
 		float fSunFacing;
-		float fMoonFacing;
-		
+		float fMoonFacing;		
 		
 		void SetupSunAndMoon()
 		{
+			//set defaults for toolset
+			vPosSun = vec3(0.0,0.0,100000.0);
+			vSunColor.rgb = vec3(0.5);
+
+			
 			//get time
 			//this will be 0.0 if the shader is running in the toolset with day-night cycle enabled
 			moduleTime = scriptableFloat1;			
@@ -82,22 +79,17 @@
 			//get sun position from module
 			vPosSun = scriptableVec1.xyz;
 			vSunColor = scriptableVec3.xyz;
+			
+			//check if toolset
+			/*if (bIsToolset) {
+				//this is toolset view so use area colors 
+				vPosSun.xyz = lightAreaDiffuseDirection;
+				vSunColor.rgb = lightAreaDiffuse;
+			}*/
 
 			//get moon position from module
 			vPosMoon = scriptableVec2.xyz;
 			vMoonColor = scriptableVec4.xyz;
-				
-			//try to identify toolset view instead of in-game player-relative
-			//the sun and moon should never be in the same position unless they are not defined.
-			//and they are not defined if the flag day-night-cycle is turned on 
-			//But if it is set to always day or always night, at least one is defined
-			if (vPosSun.xyz == vec3(0,0,0)) {
-				if (vPosMoon.xyz == vec3(0,0,0)) {
-					vPosSun = vec3(0,0,1);
-					bIsToolset = true;			
-				}
-				
-			}
 						
 			//convert frag position to player-relative position
 			vPosFrag = (vPosWorldUV.xyz - playerPosition.xyz);	
@@ -119,8 +111,7 @@
 
 		//inputs are total frag color so far, and its normal vector
 		void ComputeLightingEx(inout vec4 ColorIO, vec3 vNormalThis)
-		{
-			
+		{			
 			AmbientLight = lightAreaAmbient;
 			DiffuseLight = COLOR_BLACK.rgb;
 			
@@ -199,10 +190,20 @@
 			//replaces original area diffuse direction due to wobbling issue
 			
 			vec3 vApplicationSpread = vNormalThis;
-			#if THREE_AXIS_SHADER
-				//vApplicationSpread *= 0.5;
+			#if THREE_AXIS_SHADER == 1
+				//vApplicationSpread *= 1.5;
 				//vSunColor.rgb *= fSunFacing;
 				//vMoonColor.rgb *= fMoonFacing;
+			#elif WATER_SHADER == 1
+				//make the sun and moon application wider than normal lights based on time of day
+				vApplicationSpread *= 1.0 + 0.01+(0.02 * min(max(fDayBrightness, 10.0*fNightBrightness), 0.001))*(1.0+fDarken);
+				
+				//make daylight pinch out by water darkness and dim by time of day
+				//this should generally redden the tail of water reflection of the sun
+				vSunColor.rgb *= min(0.005*(1.0+fDarken)*(1.0+fDayBrightness), 0.00005);
+				
+				//always run moonlight as if water is black, and make it brighter
+				vMoonColor.rgb *= 2.0*fNightBrightness*(1.0-min(1.5*(fDayBrightness+0.25), 1.0)); 				
 			#endif
 			
 			ComputeDiffuseLighting(vSunColor.rgb, normalize(lightSunDir), vApplicationSpread, fDayBrightness, false);
@@ -219,28 +220,40 @@
 					#if SHADER_QUALITY_MODE > 1
 						#include "inc_plantlight"
 					#endif
-					fSourceMulti = 2.0;
+					//fSourceMulti = 2.0;
 				#endif
 			#endif	
 			
+			//normalize light so far (don't do this)
+			//AmbientLight.rgb = normalize(AmbientLight.rgb);
+			//DiffuseLight.rgb = normalize(DiffuseLight.rgb);
+			
 			//force nightly darkening 
-			float fForcedDarkness = fDayBrightness + fNightBrightness;
+			float fForcedDarkness = max(fDayBrightness, fNightBrightness);
 			AmbientLight.xyz *= fForcedDarkness;
 			DiffuseLight.xyz *= fForcedDarkness;
-			
+					
+			float fAmbLum = clamp(ColorToBrightness(AmbientLight.rgb), 0.0,1.0);
+			float fDifLum = clamp(ColorToBrightness(DiffuseLight.rgb), 0.0,1.0);
+
+			//if THREE_AXIS_SHADER == 1
 			//custom force higher diffuse and contrast to minimum of sun/moon light
-			DiffuseLight = max(DiffuseLight, fForcedDarkness);	
+			DiffuseLight *= 1.0-0.5*(fDifLum - fForcedDarkness);	
+			//endif
+			
+			//force higher contrast between light and dark
+			float fContrastFactor = 0.75;
+			if (fDifLum < fContrastFactor) DiffuseLight *= (1.0/fContrastFactor)*fDifLum;
+			
 
 			//force minimum diffuse = ambient 
-			float fAmbLum = ColorToBrightness(AmbientLight);
-			float fDifLum = ColorToBrightness(DiffuseLight);
-			if (fDifLum<fAmbLum) DiffuseLight += (fAmbLum-fDifLum) * AmbientLight;
+			if (fDifLum<fAmbLum) DiffuseLight += (fAmbLum-fDifLum) * AmbientLight;			
 					
 			//force minimum gray light
 			if (fDifLum<0.01) DiffuseLight += 0.01;	
 			
 			//bend light to force point lights to not be as forceful
-			vNormalThis *= 0.5;
+			//vNormalThis *= 0.5;
 			
 			//apply point lights
 			for (int i = 0; i < numLights; i++) 

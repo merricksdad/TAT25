@@ -41,38 +41,53 @@
 #include "inc_md_2024"
 #include "inc_3axisSimp"
 
-varying float fDistFragToCamera;
+//varying float fDistFragToCamera;
 //******************************************
 //   END Three Axis Shader Guts
 //******************************************
 
-
 void main ()
 {
-	//******************************************
-	//   BEGIN Three Axis Shader Options
-	//******************************************
-	
-	//enable/disable RGB axial painting to debug orientation
-	//0 == off
-	//1 == material painting
-	//2 == world direction painting
-	//3 == vertex normal painting
-	//4 == fragment normal painting
-	bUseTestingColors = 0;
-	
-	//bUseOriginalUV = UseOriginalUV;
-	
+	if (gl_FrontFacing == false) {
+		if (BACKFACE_AS_BLACK == 1) {
+			FragmentColor = COLOR_BLACK;
 
-	//******************************************
-	//   END Three Axis Shader Props
-	//******************************************
+			#if KEYHOLING == 1
+				ApplyKeyhole(FragmentColor);
+			#endif			
+			
+			gl_FragColor = FragmentColor;
+			
+		} else {
+			discard;
+		}
+	} else {
+		//******************************************
+		//   BEGIN Three Axis Shader Options
+		//******************************************
+		
+		//enable/disable RGB axial painting to debug orientation
+		//0 == off
+		//1 == material painting
+		//2 == world direction painting
+		//3 == vertex normal painting
+		//4 == fragment normal painting
+		bUseTestingColors = 0;
+		
+		//bUseOriginalUV = UseOriginalUV;
+		
+
+		//******************************************
+		//   END Three Axis Shader Props
+		//******************************************
+		
+		FragmentColor = vec4(1.0);
+		
+		SetupSunAndMoon();	
+		SetupThreeAxisShaderInputs();
+		ApplyThreeAxisShader();
+		
+		gl_FragColor = FragmentColor;
+	}
 	
-    FragmentColor = vec4(1.0);
-	
-	SetupSunAndMoon();	
-	SetupThreeAxisShaderInputs();
-	ApplyThreeAxisShader();
-	
-    gl_FragColor = FragmentColor;
 }

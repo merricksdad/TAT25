@@ -43,15 +43,20 @@ void TransformFoliageCoordinates()
 	
 	vLocalPosition = vPos;
 	
-	if (FoliageMaxDrawDist != 0.0) {
+	#if FOLIAGE_CULLING_ENABLED == 1
+	//do foliage culling
+	float fCullDist = FoliageMaxDrawDist;
+	if (fCullDist == 0.0) fCullDist = FOLIAGE_DEFAULT_CULL_DISTANCE;
+	if (fCullDist != -1.0) {
 		vec4 vPosTemp = (m_m * vLocalPosition);
 		float fDist = distance(vPosTemp.xyz, cameraPosition.xyz);
-		if (fDist > FoliageMaxDrawDist) {
+		if (fDist > fCullDist) {
 			//move vert outside clipspace
 			gl_Position = vec4(1,1,1,0);
 			return;
 		}	
 	}
+	#endif
 	
 	//NEW Shake Shader		
 	#if SHADER_QUALITY_MODE > 0
@@ -217,6 +222,11 @@ void TransformFoliageCoordinates()
 
 	#if POSITION_VIEW == 1
 		vPosView = (m_mv * vLocalPosition).xyz;
+				
+		#if PERSPECTIVE_SHIFT == 1 && SKYBOX_SHADER != 1	
+			if (!bIsToolset) DoPerspectiveShift();		
+		#endif	
+
 		vPosProj = m_proj * vec4(vPosView.x, vPosView.y, vPosView.z, 1.0);
 
 		#if NORMAL_MAP == 1
@@ -238,6 +248,8 @@ void TransformFoliageCoordinates()
 		vPosProj = m_mvp * vLocalPosition;
 	#endif
 	
+
+	
 	gl_Position = vPosProj;
 	
 	#if POSITION_WORLD == 1
@@ -249,6 +261,7 @@ void TransformFoliageCoordinates()
 
 void ApplyFoliageShakeShader()
 {
+	CheckIsToolset();
 	TransformFoliageCoordinates();
 	
 

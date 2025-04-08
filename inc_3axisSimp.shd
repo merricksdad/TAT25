@@ -43,6 +43,7 @@
 	uniform float TexTopHeight;
 
 	uniform int UseOriginalUV;
+	uniform int BACKFACE_AS_BLACK;
 
 
 	//==============================
