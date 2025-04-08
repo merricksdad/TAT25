@@ -1,4 +1,6 @@
 ##mixed shorter grasses
+
+transparency 0
 twosided 1
 customshadervs vsFoliage
 customshaderfs fsFoliage
@@ -16,4 +18,4 @@ parameter int FoliageWindScaleByVCoord 1
 parameter float FoliageWindScaleVCoordPower 0.25
 parameter float FoliageWindNoiseScale 2.0
 parameter int FoliageSpriteRows 2
-parameter float FoliageMaxDrawDist 30.0
+##parameter float FoliageMaxDrawDist 30.0

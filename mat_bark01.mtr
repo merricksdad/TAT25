@@ -1,1 +1,4 @@
+transparency 0
+customshadervs vslit_nm_md
+customshaderfs fslit_nm_md
 texture0 tat25_bark01

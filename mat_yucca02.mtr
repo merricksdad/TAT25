@@ -1,4 +1,6 @@
 ##all wide leaf yuccas
+
+transparency 0
 twosided 1
 customshadervs vsFoliage
 customshaderfs fsFoliage

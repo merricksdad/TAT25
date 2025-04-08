@@ -1,4 +1,5 @@
- customshadervs vs3AxisSimp
+ transparency 0
+customshadervs vs3AxisSimp
  customshaderfs fs_3axis2tex01
  renderhint NormalAndSpecMapped
  texture0 tat25_floor38

@@ -1,4 +1,7 @@
+##pale white branch
+
 twosided 1
+transparency 0
 customshadervs vsFoliage
 customshaderfs fsFoliage
 renderhint NormalAndSpecMapped

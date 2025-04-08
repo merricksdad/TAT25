@@ -1,4 +1,6 @@
 ##fir-like pine blueish-green with reddish bark
+
+transparency 0
 twosided 1
 customshadervs vsFoliage
 customshaderfs fsFoliage

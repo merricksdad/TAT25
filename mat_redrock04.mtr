@@ -1,0 +1,17 @@
+ transparency 0
+ twosided 1
+ customshadervs vs3AxisSimp
+ customshaderfs fs_3axis2tex01
+ renderhint NormalAndSpecMapped
+ texture0 tat25_floor20
+ texture1 tat25_floor20n
+ texture6 tat25_wall75
+ texture7 tat25_wall75n
+ parameter float Specularity 0.01
+ parameter float Roughness 0.99
+ parameter float TopBias 0.0
+ parameter float TexWidth 18.0
+ parameter float TexHeight 12.0
+ parameter float TexTopWidth 6.0
+ parameter float TexTopHeight 6.0
+ parameter int BACKFACE_AS_BLACK 0

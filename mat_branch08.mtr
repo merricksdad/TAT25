@@ -1,4 +1,7 @@
+##brown dry dead tree/shrub
+
 twosided 1
+transparency 0
 customshadervs vsFoliage
 customshaderfs fsFoliage
 renderhint NormalAndSpecMapped
@@ -15,4 +18,4 @@ parameter int FoliageWindScaleByVCoord 1
 parameter float FoliageWindScaleVCoordPower 0.25
 parameter float FoliageWindNoiseScale 2.0
 parameter int FoliageSpriteRows 1
-parameter float FoliageMaxDrawDist 30.0
+parameter float FoliageMaxDrawDist -1.0

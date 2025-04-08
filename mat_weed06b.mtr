@@ -1,4 +1,6 @@
 ##tumbleweed/rabbitbush dry orangeish
+
+transparency 0
 twosided 1
 customshadervs vsFoliage
 customshaderfs fsFoliage
@@ -15,4 +17,4 @@ parameter float FoliageWindMax 1.0
 parameter int FoliageWindScaleByVCoord 1
 parameter float FoliageWindScaleVCoordPower 0.5
 parameter float FoliageWindNoiseScale 1.0
-parameter float FoliageMaxDrawDist 30.0
+##parameter float FoliageMaxDrawDist 30.0

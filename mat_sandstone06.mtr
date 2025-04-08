@@ -1,3 +1,4 @@
+transparency 0
  customshadervs vs3AxisSimp
  customshaderfs fs_3axis2tex01
  renderhint NormalAndSpecMapped

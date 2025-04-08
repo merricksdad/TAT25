@@ -1,3 +1,6 @@
+##ground cover dead grass bedding 2
+
+transparency 0
 twosided 1
 customshadervs vsFoliage
 customshaderfs fsFoliage
@@ -10,4 +13,4 @@ parameter float Roughness 0.9
 
 
 parameter float FoliageWindMax 0.0
-parameter float FoliageMaxDrawDist 45.0
+##parameter float FoliageMaxDrawDist 45.0

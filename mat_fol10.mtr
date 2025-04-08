@@ -1,4 +1,6 @@
 ##Sparse Dark Cedar
+
+transparency 0
 twosided 1
 customshadervs vsFoliage
 customshaderfs fsFoliage
@@ -17,3 +19,4 @@ parameter int FoliageWindScaleByVCoord 1
 parameter float FoliageWindScaleVCoordPower 0.5
 parameter float FoliageWindNoiseScale 3.0
 parameter int FoliageSpriteRows 1
+parameter float FoliageMaxDrawDist -1.0
